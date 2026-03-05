@@ -157,6 +157,7 @@ navbuddy.setup({
 require("lightspeed").setup({ ignore_case = true, repeat_ft_with_target_char = true })
 
 local lga_actions = require("telescope-live-grep-args.actions")
+--[[ nvim-lightbulb not installed
 require("nvim-lightbulb").setup({
 	ignore = { ft = { "python" } },
 	autocmd = { enabled = true },
@@ -167,6 +168,7 @@ require("nvim-lightbulb").setup({
 		hl = "LightBulbNumber",
 	},
 })
+--]]
 
 local telescope = require("telescope")
 
@@ -336,7 +338,7 @@ vim.lsp.set_log_level("debug")
 --},
 --},
 --})
-require("refactoring").setup({})
+--require("refactoring").setup({}) -- refactoring.nvim not installed
 --
 -- none-ls config moved to myplugins/lspconfig.lua (loaded via Lazy.nvim)
 --require('lint').linters_by_ft = {
@@ -352,6 +354,7 @@ require("which-key").setup({
 	-- or leave it empty to use the default settings
 	-- refer to the configuration section below
 })
+--[[ chatgpt not installed
 require("chatgpt").setup({
 	["chat.sessions_window.buf_options.cinkeys"] = "chatgpt",
 	["popup_window.buf_options.cinkeys"] = "chatgpt",
@@ -359,8 +362,8 @@ require("chatgpt").setup({
 	["popup_input.buf_options.cinkeys"] = "chatgptp",
 	log_file = vim.fn.expand('~') .. "\\chatgptn.log",
 })
-
-local chatgpt = require("chatgpt")
+--]]
+--local chatgpt = require("chatgpt") -- chatgpt not installed
 wk = require("which-key")
 wk.setup({ plugins = { presets = { operators = false } }, 
 triggers_blacklist = { c = { "*" ,"%"}, v= { "*","%" } } 
@@ -551,13 +554,14 @@ require("telescope").load_extension("git_grep")
 --search = '',
 --})
 --end
-require("wtf").setup()
+--require("wtf").setup() -- wtf.nvim not installed
 --require("project_nvim").setup {
 -- your configuration comes here
 -- or leave it empty to use the default settings
 -- refer to the configuration section below
 --}C:\Users\ekarni\Neovim\bin
 
+--[[ workspaces.nvim not installed
 require("workspaces").setup({
 	path = vim.fn.stdpath("data") .. "/workspaces",
 	hooks = {
@@ -567,7 +571,8 @@ require("workspaces").setup({
 		end,
 	},
 })
-require("actions-preview").setup({})
+--]]
+--require("actions-preview").setup({}) -- actions-preview.nvim not installed
 --require('mouse').setup()
 --local configs = require'nvim-treesitter.configs'
 --require'nvim-treesitter.configs'.setup {

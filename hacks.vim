@@ -284,8 +284,8 @@ endfunction
 "
 au ExitPre call StopTimerFunc() 
 function! StopTimerFunc()
-    call timer_stop(g:autosaveWS)
-    call timer_stop(g:timerb)
+    if exists('g:autosaveWS') | call timer_stop(g:autosaveWS) | endif
+    if exists('g:timerb') | call timer_stop(g:timerb) | endif
 
 endfunction
 

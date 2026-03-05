@@ -1,4 +1,9 @@
 return {
+    {
+        "sindrets/diffview.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
+    },
     --{ "girishji/pythondoc.vim" },
     --{ "vim-scripts/LargeFile" },
     {
@@ -8,54 +13,8 @@ return {
             "nvim-telescope/telescope.nvim",
             "nvim-treesitter/nvim-treesitter",
         },
-        opts = {}
-    },
-    {
-        "rcarriga/nvim-dap-ui",
-        dependencies = "mfussenegger/nvim-dap",
-        config = function()
-            local dap = require("dap")
-            local dapui = require("dapui")
-            dapui.setup()
-            dap.listeners.after.event_initialized["dapui_config"] = function()
-                dapui.open()
-            end
-            dap.listeners.before.event_terminated["dapui_config"] = function()
-                dapui.close()
-            end
-            dap.listeners.before.event_exited["dapui_config"] = function()
-                dapui.close()
-            end
-        end,
-        keys = {
-            { "<leader>Dc", function() require("dap").continue() end, desc = "DAP Continue" },
-            { "<leader>Db", function() require("dap").toggle_breakpoint() end, desc = "DAP Toggle Breakpoint" },
-            { "<leader>Do", function() require("dap").step_over() end, desc = "DAP Step Over" },
-            { "<leader>Di", function() require("dap").step_into() end, desc = "DAP Step Into" },
-            { "<leader>Du", function() require("dapui").toggle() end, desc = "DAP UI Toggle" },
-        },
-    },
-    {
-        "mfussenegger/nvim-dap",
-        config = function(_, opts)
-            --require("core.utils").load_mappings("dap")
-        end,
-    },
-    {
-        "mfussenegger/nvim-dap-python",
-        ft = "python",
-        dependencies = {
-            "mfussenegger/nvim-dap",
-            "rcarriga/nvim-dap-ui",
-            "nvim-neotest/nvim-nio",
-        },
-        config = function(_, opts)
-            --local path =
-
-            --[[ C:\Users\ekarni\.pyenv\pyenv-win\versions\3.10\python.exe ]]     --"~/.local/share/nvim/mason/packages/debugpy/venv/bin/python"
-            require("dap-python").setup("python")
-            --require("core.utils").load_mappings("dap_python")
-        end,
+        opts = {},
+		enabled=false,
     },
     {
         "ibhagwan/fzf-lua",
@@ -63,7 +22,18 @@ return {
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
             -- calling `setup` is optional for customization
-            require("fzf-lua").setup({})
+            require("fzf-lua").setup({
+                winopts = {
+                    width  = 0.95,
+                    height = 0.90,
+                    row    = 0.50,
+                    col    = 0.50,
+                    preview = {
+                        layout     = "horizontal",
+                        horizontal = "right:55%",
+                    },
+                },
+            })
         end,
     },
     {
