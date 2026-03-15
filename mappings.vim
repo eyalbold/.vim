@@ -794,7 +794,6 @@ command PyRun -complete=custom,IPyCompleteForInput <CMD>call IPyRun(<f-args>)
 "nmap <M-r> <CMD>call IPyRun(input('enter python: '))<CR>
 "nmap <M-I> <CMD>let @z=input('enter text: ') <bar> norm "zp<CR>
 "nmap <M-i> <CMD>let @z=input('enter text: ') <bar> norm "zp<CR>
-nmap <M-i> <leader>of
 
 let g:neoterm_automap_keys="<plug>(aaaa)"
 
@@ -1003,17 +1002,22 @@ imap <m-p> <c-o><CMD>call Domp()<CR><c-r>z
 nmap mwin :s/\<lf>CR>/
 
 
-"remove empty spaces and lines
+" msA - whole file: remove leading spaces, trailing spaces, empty lines, collapse multi-spaces
 nnoremap msA :%s/^[\t ]*//<CR>:%s/\s\+$//e<CR>:%g/^[\t ]*$/d<CR>:%s/[  ]* / /g<CR>
+" msa - current line: remove leading spaces, trailing spaces, delete if empty, collapse multi-spaces
 nnoremap msa :s/^[\t ]*//<CR>:s/\s\+$//e<CR>:.g/^[\t ]*$/d<CR>:s/[  ]* / /g<CR>
 
+" msb - whole file: remove trailing spaces, delete empty lines, collapse multi-spaces
 nnoremap msb :%s/\s\+$//e<CR>:g/^$/d<CR>:%s/[  ]* / /g<CR>
-"remove multi space in current line
+" mss - current line: collapse multiple spaces into one
 nnoremap mss <CMD>s/\s\+/ /g<CR>
-"remove empty lines
+" msl - whole file: remove trailing spaces
 nnoremap msl <CMD>%s/\s\+$//e<CR>
-"remove trailing spaces
+" msc - whole file: remove trailing spaces (alternative pattern)
 nnoremap msc <CMD>%s/^\(.\{-\}\)[ ]*$/\1<CR>
+" msp - paste from clipboard, remove newlines, trailing spaces, and leading spaces after newlines/tabs, save file
+nnoremap msp :let @p=substitute(substitute(substitute(@+,' \+\n','\n','g'),'\([\n\t]\) \+','\1','g'),'\n','','g')<CR>"pp:w<CR>
+nnoremap msg :let @p=substitute(substitute(substitute(@+,' \+\n','\n','g'),'\([\n\t]\) \+','\1','g'),'\n','','g')<CR>:exec ":e ". @p<CR>
 "open cur folder 
 "nmap mt <CMD>NvimTreeClose<CR>:<CMD>echom ":NvimTreeOpen ".getcwd() <CR>:<CMD>exec ":NvimTreeOpen ".escape(getcwd(),'\')<CR> 
 "noremap mt <CMD>call CloseAllNR()<CR>:<CMD>sleep 200m<CR>:<CMD>exec ":vert topleft split " . getcwd()<CR>
@@ -1441,38 +1445,52 @@ function! LfFil(a)
 endfunction
 
 "opens file
+" filefolder, git files
 nmap <c-p> mc<leader>gf
+" newv filefolder, git files
 nmap <m-p> mc\vn<leader>gf
+" newv filefolder, all files
 nmap <m-o> mc<leader>vn<c-a>f
+" pick file  filefolder
+nmap <m-i> mc<c-a>f
 "nmap <c-u> <CMD>Telescope lsp_workspace_symbols<CR>
+" LSP doc symbols
 nmap <m-,> <CMD>Telescope lsp_document_symbols<CR>
 "nmap <c-\> <CMD>Telescope lsp_workspace_symbols<CR>
+" newv git root filefolder, all files
 nmap <m-'> mc<leader>vn<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]`<CR><c-a>f
 
+" newv cwd  git file
 nmap <leader>mg <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><leader>gf
-nmap <leader>of <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR>ml<M-Bslash>
+"" newv choose file and folder picker
+"nmap <leader>of <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR>ml<M-Bslash>
+" newv buffer picker (close tree)
 nmap mo <CMD>call CloseVisibleNvimTreeBuffers()<CR><CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR>ml<M-Bslash>
-nmap mO <CMD>call CloseVisibleNvimTreeBuffers()<CR><CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR>ml<M-Bslash>
 function! JJJ()
 call feedkeys("mo\<C-b>")
 endfunction 
 nmap <plug>ttt <CMD>call JJJ()<CR>
+" mo + buf search in vsplit
 nmap <expr> <c-b> "<plug>ttt"
 function! JJX()
     call feedkeys("\<bar>\<C-b>")
 endfunction
 nmap <plug>ttx <CMD>call JJX()<CR>
+" | + buf search (no vsplit)
 nmap <expr> <c-\> "<plug>ttx"
-"<c-b> the same with tab
-"swaps right and left window
+" swap windows
 nmap mO <c-w><c-r>
+" newv file from cwd
 nmap <leader>og <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>LeaderfFile<CR>
+" newv cwd  MRU
 nmap <leader>OF <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><CMD>let g:Lf_JumpToExistingWindow = 0<CR>mm
+" newv choose dirs and file
 nmap <leader>of <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('LfFil'),'options': '-m'})<CR>
 "open python
 "function! findbufjup
 "o
 "endfunction
+" jupyter buffer
 nmap <leader>op :sp <bar> :exec ':'. bufnr("\[jupyter\]") .'buffer'<CR><c-w>k
 nmap <leader>upd \ttupama
 
