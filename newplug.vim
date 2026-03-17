@@ -18,6 +18,7 @@ Plugit 'MunifTanjim/nui.nvim', {'event': 'VeryLazy'}
 Plugit 'powerman/vim-plugin-AnsiEsc'
 Plugit 'easymotion/vim-easymotion'
 Plugit 'hgiesel/vim-motion-sickness'
+Plugit 'vim-scripts/ingo-library'
 Plugit 'vim-scripts/EnhancedJumps'
 Plugit 'jeetsukumaran/vim-indentwise'
 Plugit 'andymass/vim-matchup'
@@ -27,6 +28,7 @@ Plugit 'scrooloose/nerdcommenter'
 Plugit 'PeterRincker/vim-argumentative'
 Plugit 'mg979/vim-visual-multi'
 Plugit 'tpope/vim-fugitive'
+Plugit 'airblade/vim-gitgutter'
 Plugit 'tpope/vim-repeat'
 Plugit 'davvid/telescope-git-grep.nvim'
 Plugit 'nvim-tree/nvim-tree.lua'
@@ -48,7 +50,7 @@ Plugit 'folke/which-key.nvim'
 Plugit 'PProvost/vim-ps1'
 Plugit 'kana/vim-textobj-user'
 Plugit 'SmiteshP/nvim-navic'
-Plugit 'SmiteshP/nvim-navbuddy', {'event': 'VeryLazy'}
+Plugit 'hasansujon786/nvim-navbuddy', {'event': 'VeryLazy'}
 
     Plugit 'tmhedberg/SimpylFold'
     if !has('nvim')

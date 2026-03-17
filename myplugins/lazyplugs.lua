@@ -248,10 +248,24 @@ opts = {
 },
 },
 {
+    "aznhe21/actions-preview.nvim",
+    event = "VeryLazy",
+    config = function()
+        require("actions-preview").setup()
+    end,
+},
+{
   "nvim-telescope/telescope-frecency.nvim",
   -- install the latest stable version
   version = "*",
   config = function()
+    require("telescope").setup {
+      extensions = {
+        frecency = {
+          db_safe_mode = false,
+        },
+      },
+    }
     require("telescope").load_extension "frecency"
   end,
 }

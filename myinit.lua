@@ -365,9 +365,45 @@ require("chatgpt").setup({
 --]]
 --local chatgpt = require("chatgpt") -- chatgpt not installed
 wk = require("which-key")
-wk.setup({ plugins = { presets = { operators = false } }, 
-triggers_blacklist = { c = { "*" ,"%"}, v= { "*","%" } } 
+wk.setup({ plugins = { presets = { operators = false } },
+triggers_blacklist = { c = { "*" ,"%"}, v= { "*","%" } }
 })
+
+-- Show Alt/Ctrl mappings in a which-key popup using wk's own tree (has comment-based labels)
+local function show_modifier_mappings(trigger_key, pattern, display_name)
+  local Keys = require("which-key.keys")
+  local buf = vim.api.nvim_get_current_buf()
+  Keys.update(buf)
+  local result = Keys.get_mappings("n", "", buf)
+
+  local mappings = { name = display_name }
+  for _, entry in ipairs(result.mappings) do
+    local key_notation = entry.key  -- e.g. "<M-a>"
+    if key_notation then
+      local inner = key_notation:match(pattern)
+      if inner and not inner:match("^%d$") then
+        local wk_key = #inner == 1 and inner or ("<" .. inner .. ">")
+        if not mappings[wk_key] then
+          local prefix = entry.prefix  -- notation string, e.g. "<M-a>"
+          mappings[wk_key] = {
+            function() vim.fn.feedkeys(vim.api.nvim_replace_termcodes(prefix, true, true, true), "m") end,
+            (entry.label ~= "" and entry.label) or prefix,
+          }
+        end
+      end
+    end
+  end
+  wk.register(mappings, { prefix = trigger_key, mode = "n" })
+  wk.show(vim.api.nvim_replace_termcodes(trigger_key, true, true, true), { mode = "n" })
+end
+
+vim.keymap.set("n", "<leader>hm", function()
+  show_modifier_mappings("<F20>", "^<M%-(.-)>$", "Alt")
+end, { desc = "Show Alt keymaps" })
+
+vim.keymap.set("n", "<leader>hc", function()
+  show_modifier_mappings("<F21>", "^<C%-(.-)>$", "Ctrl")
+end, { desc = "Show Ctrl keymaps" })
 --wk.register({
 	--p = {
 		--name = "ChatGPT",

@@ -162,7 +162,17 @@ return {
             })
 
             mason.setup()
-            mason_lspconfig.setup({ automatic_enable = true })
+            -- Prepend Mason bin dir so lspconfig can find manually-configured servers
+            vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin" .. ";" .. vim.env.PATH
+            mason_lspconfig.setup({
+                automatic_enable = {
+                    exclude = {
+                        "pylsp", "jedi_language_server", "pyright",
+                        "vale_ls", "rust_analyzer", "powershell_es",
+                        "yamlls", "proselint", "html", "jsonls",
+                    }
+                }
+            })
             local capabilities = vim.tbl_deep_extend(
                 "force",
                 vim.lsp.protocol.make_client_capabilities(),
