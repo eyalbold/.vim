@@ -153,13 +153,14 @@ return {
   "coder/claudecode.nvim",
   dependencies = {  },
   config = true,
+  lazy = false,
   keys = {
     { "<leader>a", nil, desc = "AI/Claude Code" },
     { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
     { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
     { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
     { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
-    { "<leader>aS", "<cmd>ClaudeCodeStart!<cr>", desc = "Claude Force Start" },
+    { "<leader>aS", "<cmd>call CloseClaudeBufferInWindow()<cr><cmd>ClaudeCodeStart!<cr>", desc = "Claude Force Start" },
     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
     { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
@@ -253,6 +254,20 @@ opts = {
     config = function()
         require("actions-preview").setup()
     end,
+},
+{
+    "folke/trouble.nvim",
+    opts = {},
+    cmd = "Trouble",
+    keys = {
+        { "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Document Diagnostics (Trouble)" },
+        { "<leader>xw", "<cmd>Trouble diagnostics toggle<cr>", desc = "Workspace Diagnostics (Trouble)" },
+        { "<leader>xq", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix (Trouble)" },
+        { "<leader>xr", "<cmd>Trouble lsp_references toggle<cr>", desc = "LSP References (Trouble)" },
+        { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+        { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / references / ..." },
+        { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
+    },
 },
 {
   "nvim-telescope/telescope-frecency.nvim",

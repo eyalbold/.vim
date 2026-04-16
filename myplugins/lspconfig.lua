@@ -167,7 +167,7 @@ return {
             mason_lspconfig.setup({
                 automatic_enable = {
                     exclude = {
-                        "pylsp", "jedi_language_server", "pyright",
+                        "pylsp","jedi_language_server", "pyright",
                         "vale_ls", "rust_analyzer", "powershell_es",
                         "yamlls", "proselint", "html", "jsonls",
                     }
@@ -221,6 +221,7 @@ return {
             }
             require("lspconfig").proselint.setup()
             require("lspconfig").pylsp.setup({
+                bundle_path = vim.fn.stdpath("data") .. "/mason/packages/python-lsp-server",
                 capabilities = capabilities,
                  on_attach = function(client, bufnr)
                     -- Disable symbol information

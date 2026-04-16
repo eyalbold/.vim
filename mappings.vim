@@ -1279,7 +1279,7 @@ nnoremap <leader><bar> <bar>
 "<M-Bslash>
 nmap <bar> <CMD>let g:Lf_JumpToExistingWindow = 1<CR><CMD>LeaderfDisablePreview<CR><CMD>Leaderf --popup buffer --all<CR>
 " |: fzf buffer picker
-nmap <bar> <CMD>FzfLua buffers<CR>
+"nmap <bar> <CMD>FzfLua buffers<CR>
 " M-\: Leaderf buffer picker (opens in new window)
 nmap <M-Bslash> <CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup buffer --all<CR>
 "nnoremap <silent> <M-Bslash> <CMD>call FZFOpen(':Windows')<CR>
@@ -2657,7 +2657,7 @@ endfunction
 nmap <leader>vv <CMD>call Exec('version')<CR>
 
 "nmap <m-p> :Telescope lsp_document_symbols<CR>
-" c-i: buffer search without vsplit (|+C-B); replaces jump-forward
+" c-i:  C-B without vsplit
 nmap <c-i> <CMD>call JJH()<CR>
 " M-i: vanilla c-i (jump forward in jump list)
 nnoremap <m-i> <c-i>
@@ -2818,13 +2818,13 @@ nmap \\. <CMD>call Exec(expand('@:'))<CR>
 "call nvim_input('ea<BS><tab>')<CR><CMD>call timerstart(1,"call nvim_input('<tab><c-y>')")<CR>
 "
 "
-nnoremap <leader>xq <cmd>TroubleToggle quickfix<cr>
-nnoremap <leader>xw <cmd>TroubleToggle workspace_diagnostics<cr>
-nnoremap <leader>xd <cmd>TroubleToggle document_diagnostics<cr>
-nnoremap <leader>xr <cmd>TroubleToggle lsp_references<cr>
+"nnoremap <leader>xq <cmd>TroubleToggle quickfix<cr>
+"nnoremap <leader>xw <cmd>TroubleToggle workspace_diagnostics<cr>
+"nnoremap <leader>xd <cmd>TroubleToggle document_diagnostics<cr>
+"nnoremap <leader>xr <cmd>TroubleToggle lsp_references<cr>
 
-nmap _i <CMD>NayvyImports<CR>
-nmap _I <CMD>NayvyImportFZF<CR>
+"nmap _i <CMD>NayvyImports<CR>
+"nmap _I <CMD>NayvyImportFZF<CR>
 
 
 nnoremap <expr><silent> <LocalLeader>ro  nvim_exec('MagmaEvaluateOperator', v:true)
@@ -2837,7 +2837,7 @@ nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
 function! StashME()
  let stash = input('Enter name: ')
- exec "!git stash push -m \"". stash . '" --keep-index '. expand('%') 
+ exec "!git stash push -m \"". stash . '" -- '. expand('%') .' && git stash apply --index'
 endfunction
 function! StashAll() 
     let stash = input('Enter name: ')
@@ -2981,6 +2981,7 @@ nmap <leader>dx <CMD>diffthis<CR><CMD>call GoOther()<CR><CMD>diffthis<CR>
 
 "nnoremap <leader>Gcv <CMD>Git commit -v -q<CR>
 
+nmap <leader>GHO :DiffviewFileHistory<CR>
 nmap <leader>GH :DiffviewFileHistory --base=LOCAL<CR>
 nmap <leader>GHF :DiffviewFileHistory --all --walk-reflogs<CR>
 nmap <leader>Gh :DiffviewFileHistory --base=LOCAL --walk-reflogs --all %<CR>

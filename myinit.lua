@@ -1,3 +1,10 @@
+local _orig_notify = vim.notify
+vim.notify = function(msg, ...)
+  if type(msg) == "string" and msg:find("Spawning language server") then
+    return
+  end
+  return _orig_notify(msg, ...)
+end
 
 local api = vim.api
 function GotoMap(c)
@@ -381,6 +388,12 @@ local function show_modifier_mappings(trigger_key, pattern, display_name)
     local key_notation = entry.key  -- e.g. "<M-a>"
     if key_notation then
       local inner = key_notation:match(pattern)
+      -- <C-i>/<Tab> and <C-m>/<CR> are equivalent; include aliases in Ctrl view
+      if not inner and display_name == "Ctrl" then
+        if key_notation == "<Tab>" then inner = "i"
+        elseif key_notation == "<CR>" then inner = "m"
+        elseif key_notation == "<Esc>" then inner = "[" end
+      end
       if inner and not inner:match("^%d$") then
         local wk_key = #inner == 1 and inner or ("<" .. inner .. ">")
         if not mappings[wk_key] then

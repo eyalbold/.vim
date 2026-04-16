@@ -576,8 +576,9 @@ function! GetVisualSelection() abort
 endfunction
 
 function! CloseAllBuffersButCurrent()
-    %bd
-    e#
+    let l:cur = expand("%:p")
+    %bw
+    execute ':e '.l:cur
 endfunction
 "Closes the other buffers but Nerdtree. Unless only 2 buffers left. In this
 "case, closes nerdtree.
@@ -1290,3 +1291,16 @@ function! MoveMe(...)
 endfunction
 
 command! -nargs=? -complete=file MoveMe call MoveMe(<f-args>)
+
+function! CloseClaudeBufferInWindow()
+  for bufnr in tabpagebuflist()
+    let name = bufname(bufnr)
+    if name =~? 'claude' && getbufvar(bufnr, '&buftype') == 'terminal'
+      let winid = bufwinid(bufnr)
+      if winid != -1
+        call win_execute(winid, 'close')
+      endif
+    endif
+  endfor
+endfunction
+
