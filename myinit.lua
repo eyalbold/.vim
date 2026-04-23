@@ -1,6 +1,9 @@
 local _orig_notify = vim.notify
 vim.notify = function(msg, ...)
   if type(msg) == "string" and msg:find("Spawning language server") then
+      return
+  end
+  if type(msg) == "string" and msg:find("navbuddy:") then
     return
   end
   return _orig_notify(msg, ...)

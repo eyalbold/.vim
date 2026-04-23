@@ -7,6 +7,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
             -- Disable completion for jedi_language_server
             if client.name =="pylsp" then 
                 client.server_capabilities.hoverProvider=false 
+                client.server_capabilities.documentSymbolProvider = true
+                client.server_capabilities.workspaceSymbolProvider = true
             end 
 
             if client.name == "jedi_language_server" then
@@ -16,6 +18,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
             -- Disable completion for pyright
             if client.name == "pyright" then
                 client.server_capabilities.completionProvider = false
+                client.server_capabilities.documentSymbolProvider = false
+                client.server_capabilities.workspaceSymbolProvider = false
                 --client.server_capabilities.hoverProvider = false
             end
         end
@@ -130,7 +134,7 @@ return {
     { "williamboman/mason-lspconfig.nvim" },
     {
         "neovim/nvim-lspconfig",
-        commit = "cee94b2",
+        --commit = "cee94b2",
         dependencies = {
             "hrsh7th/cmp-nvim-lsp",
             "nvim-telescope/telescope-live-grep-args.nvim",
@@ -223,12 +227,7 @@ return {
             require("lspconfig").pylsp.setup({
                 bundle_path = vim.fn.stdpath("data") .. "/mason/packages/python-lsp-server",
                 capabilities = capabilities,
-                 on_attach = function(client, bufnr)
-                    -- Disable symbol information
-                    client.server_capabilities.documentSymbolProvider = false
-                    client.server_capabilities.workspaceSymbolProvider = false
-                    on_attach(client, bufnr)
-                end,
+                 on_attach = on_attach,
                 settings = {
                     pylsp = {
                         plugins = {
@@ -242,7 +241,12 @@ return {
                             pylint = { enabled = false },
                             --rope = { enabled = true, ropefolder = "C:\\temp\\rope" },
                             ----rope_autoimport = {enabled = true, {code_actions = {enabled = true}}},
-                            --rope_autoimport = {enabled = true, {completions = {enabled = true}, {code_actions = {enabled = true}}}},
+                            rope_autoimport = {enabled = true},
+                            jedi_workspace_symbols = {
+                                enabled = true,
+                                max_symbols = 500,
+                                ignore_folders = {},
+                            },
                             --jedi_symbols = {
                                 --enabled = true,  -- Disable symbol information
                             --},
@@ -259,22 +263,22 @@ return {
                 on_attach = on_attach,
                 flags = lsp_flags,
             })
-            require'lspconfig'.jedi_language_server.setup({
-                capabilities = capabilities,
-                on_attach = on_attach,
-                ---------root_dir = function() return vim.loop.cwd() end
-                settings = {
-                    jediSettings = {
-                        symbols = {
-                            workspace = {
-                                maxSymbols = 10000
-                            }
-                        }
-                    }
-                },
+            --require'lspconfig'.jedi_language_server.setup({
+                --capabilities = capabilities,
+                --on_attach = on_attach,
+                -----------root_dir = function() return vim.loop.cwd() end
+                --settings = {
+                    --jediSettings = {
+                        --symbols = {
+                            --workspace = {
+                                --maxSymbols = 10000
+                            --}
+                        --}
+                    --}
+                --},
             
-                flags = lsp_flags,
-            })
+                --flags = lsp_flags,
+            --})
             
 
             --require("lspconfig")['htmlbeautifier'].setup({
@@ -344,7 +348,7 @@ return {
                     null_ls.builtins.formatting.stylua,
                     null_ls.builtins.formatting.isort,
                     null_ls.builtins.formatting.black,
-                    --null_ls.builtins.formatting.jq,
+                    null_ls.builtins.formatting.jq,
                     null_ls.builtins.formatting.prettier,
                     null_ls.builtins.diagnostics.proselint,
                     null_ls.builtins.formatting.biome,

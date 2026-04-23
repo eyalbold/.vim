@@ -50,8 +50,7 @@ Plugit 'PProvost/vim-ps1'
 Plugit 'kana/vim-textobj-user'
 Plugit 'SmiteshP/nvim-navic'
 Plugit 'hasansujon786/nvim-navbuddy', {'event': 'VeryLazy'}
-
-    Plugit 'tmhedberg/SimpylFold'
-    if !has('nvim')
-        call plug#end()
-    endif
+Plugit 'tmhedberg/SimpylFold'
+if !has('nvim')
+    call plug#end()
+endif

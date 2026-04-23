@@ -937,7 +937,7 @@ cmap <c-.> <CMD>call CompleteInf()<CR>
 " M-f (insert): fzf path completion
 imap <m-f> <CMD>FzfLua complete_path<CR>
 " M-g: spell suggest picker
-map <m-g> <CMD>FzfLua spell_suggest<CR>
+map <m-x> <CMD>FzfLua spell_suggest<CR>
 " M-hjkl (insert): arrow navigation without leaving insert mode
 inoremap <m-h> <Left>
 imap <m-l> <Right>
@@ -1462,7 +1462,7 @@ nnoremap <expr> <leader>EM exists(":Noice") ? "<CMD>NoiceTelescope<CR>" : "<CMD>
 
 "enable save
 " \as: toggle buffer-local auto-save
-nnoremap <leader>as :if exists('b:auto_save') <bar> :let b:auto_save = !b:auto_save <bar> else <bar> let b:auto_save=1 <bar> endif<CR>:echo "it is now locally". b:auto_save<CR>
+nnoremap <leader>as <CMD>lua vim.b.auto_save = not vim.b.auto_save; print("auto_save is now locally " .. tostring(vim.b.auto_save))<CR>
 " \SI: toggle save-inserts for current buffer
 nnoremap <leader>SI :let b:save_inserts= !b:save_inserts<CR>:echo "save inserts is now ". b:save_inserts<CR>
 " \AS: toggle AutoSave plugin globally
@@ -1642,13 +1642,17 @@ nmap <m-p> mc\vn<leader>gf
 nmap <m-o> mc<leader>vn<c-a>f
 " pick file  filefolder
 nmap <m-i> mc<c-a>f
+" newv git root filefolder, all files
+nmap <m-'> mc<leader>vn<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]`<CR><c-a>f
 "nmap <c-u> <CMD>Telescope lsp_workspace_symbols<CR>
 " LSP doc symbols
 " M-,: LSP document symbols (Telescope)
-nmap <m-,> <CMD>Telescope lsp_document_symbols<CR>
+"nnoremap <m-i> :Telescope lsp_document_symbols<CR>
+nmap <m-g> <CMD>Telescope lsp_document_symbols<CR>
+nmap <c-g> _O
+"workspace symbols
+"nmap <m-,> _O
 "nmap <c-\> <CMD>Telescope lsp_workspace_symbols<CR>
-" newv git root filefolder, all files
-nmap <m-'> mc<leader>vn<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]`<CR><c-a>f
 
 " newv cwd  git file
 nmap <leader>mg <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><leader>gf
@@ -1667,7 +1671,10 @@ function! JJX()
 endfunction
 nmap <plug>ttx <CMD>call JJX()<CR>
 " | + buf search (no vsplit)
-nmap <expr> <c-\> "<plug>ttx"
+"nmap <expr> <c-\> "<plug>ttx"
+" c-i:  C-B without vsplit
+"nmap <c-i> <CMD>call JJH()<CR>
+" M-i: vanilla c-i (jump forward in jump list)
 " swap windows
 nmap mO <c-w><c-r>
 " newv file from cwd
@@ -2142,7 +2149,7 @@ nmap <BS> call Show_documentation()<CR>
 " _o: LSP document symbols (Telescope)
 nnoremap _o <CMD>Telescope lsp_document_symbols<CR>
 " _O: LSP workspace symbols (Telescope)
-nnoremap _O <CMD>Telescope lsp_workspace_symbols<CR>
+nnoremap _O <CMD>lua require('telescope.builtin').lsp_workspace_symbols({path_display={"smart"},filename_width=70,symbol_width=40,  layout_config={width=0.9, preview_width=0.6}})<CR>
 " _r: LSP references (Telescope)
 nnoremap _r <CMD>Telescope lsp_references<CR>
 " _a: LSP code actions (Telescope)
@@ -2657,10 +2664,6 @@ endfunction
 nmap <leader>vv <CMD>call Exec('version')<CR>
 
 "nmap <m-p> :Telescope lsp_document_symbols<CR>
-" c-i:  C-B without vsplit
-nmap <c-i> <CMD>call JJH()<CR>
-" M-i: vanilla c-i (jump forward in jump list)
-nnoremap <m-i> <c-i>
 
 function! JJH()
 call feedkeys("|\<C-B>")
@@ -2986,6 +2989,8 @@ nmap <leader>GH :DiffviewFileHistory --base=LOCAL<CR>
 nmap <leader>GHF :DiffviewFileHistory --all --walk-reflogs<CR>
 nmap <leader>Gh :DiffviewFileHistory --base=LOCAL --walk-reflogs --all %<CR>
 nmap <leader>gh :DiffviewFileHistory --base=LOCAL %<CR>
+nmap <leader>Gho :DiffviewFileHistory --base=LOCAL<CR>
+nmap <leader>Ghn :DiffviewFileHistory --base=LOCAL %<CR>
 
 
 
