@@ -568,7 +568,9 @@ command! -bang -nargs=* FzfRgDir
 let g:fzf_action = {'ctrl-o' : '!open'}
 "let g:fzf_history= "~/.fzf/history"
 let g:fzf_history=  g:user_home.'\.fzf\history_f'
-set shell=cmd.exe
+if g:on_windows
+    set shell=cmd.exe
+endif
 let $FZF_DEFAULT_OPTS="--history=" . ('C:/Users/EyalKarni/.fzf/history_file')
 " had to change ~/.fzf to add escape for default_OPTS
 "#. "\\.fzf\\history_file"

@@ -186,6 +186,54 @@ function! SetFont()
     endif
 endfunction
 ":GuiTabline 0
+
+" Find the GUI nvim process (nvim-qt/goneovim/neovide/MacVim) that spawned
+" this nvim via `ps`, kill it, and relaunch. Unix-only.
+function! ResetNvimUnix()
+    silent! wshada!
+    " Force a POSIX shell so this works even if &shell is stale (e.g. cmd.exe
+    " leaking onto macOS from pre-fix sessions).
+    let l:saved_shell = &shell
+    let l:saved_shcf  = &shellcmdflag
+    set shell=/bin/sh
+    set shellcmdflag=-c
+    try
+        let l:ppid = trim(system('ps -o ppid= -p ' . getpid()))
+        let l:pcmd = trim(system('ps -o command= -p ' . l:ppid))
+    finally
+        let &shell = l:saved_shell
+        let &shellcmdflag = l:saved_shcf
+    endtry
+    if l:pcmd !~? 'nvim-qt\|goneovim\|neovide\|macvim\|vimr'
+        echoerr 'ResetNvimUnix: unrecognized parent: ' . l:pcmd
+        return
+    endif
+    let l:exe = split(l:pcmd, '\s\+')[0]
+    call system('/bin/sh -c ' . shellescape('( kill ' . l:ppid . ' && sleep 0.4 && ' . shellescape(l:exe) . ' >/dev/null 2>&1 & ) &'))
+    qa!
+endfunction
+
+" Ask claude about a vim error. The user supplies the error text; we attach
+" the tail of ~/.vim/vimlog.log as context. Opens in a snacks terminal.
+" Usage:  :ClaudeLastError E5108: Lua: ...
+command! -nargs=+ ClaudeLastError call s:ClaudeLastError(<q-args>)
+function! s:ClaudeLastError(error) abort
+    let l:log_path = expand('~/.vim/vimlog.log')
+    let l:lines = filereadable(l:log_path) ? readfile(l:log_path) : []
+    let l:tail = len(l:lines) > 400 ? l:lines[-400:] : l:lines
+    let l:tmp = tempname()
+    call writefile([
+        \ 'Analyze this vim error and suggest a fix.',
+        \ '',
+        \ 'Error reported by the user:',
+        \ a:error,
+        \ '',
+        \ 'Tail of ~/.vim/vimlog.log:',
+        \ '---'] + l:tail + ['---'], l:tmp)
+    let l:cmd = 'claude "$(cat ' . shellescape(l:tmp) . ')"'
+    call luaeval('Snacks.terminal.open(_A, { win = { position = "right", width = 0.4 } })', l:cmd)
+endfunction
+
 function! OnLoad()
 
     let g:onedark_config = {
@@ -324,32 +372,46 @@ let g:GuiLoaded=1
 			""~/nvimMACfiles/macmap042.vim
 		"endif 
     if 1
-        if g:on_ek_computer
+        if g:on_windows
             nmap <leader>rv :wshada!<CR>:exec "!start pwsh  -Command ResetNeo"<CR>
-
-            "source /Users/eyalkarni/neovim-0.4.2/runtime/macmap.vim 
+        else
+            nmap <leader>rv :call ResetNvimUnix()<CR>
         endif
-        set shell=cmd 
+
+            "source /Users/eyalkarni/neovim-0.4.2/runtime/macmap.vim
+        if g:on_windows
+            set shell=cmd
+        endif
 
         exec "silent !echo ". v:servername . " > " . expand('~/temp/listen.txt')
         "override
-        nmap <D-f> <Plug>(easymotion-s2) 
+        nmap <D-f> <Plug>(easymotion-s2)
 
-        "imap <D-v> <c-o>P
         nnoremap <Home> ^
         vnoremap <Home> ^
-		"set guifont=Meslo\ LG\ S\ for\ Powerline:h14
-"		set guifont=Monaco\ for\ Powerline:h12 
-		set mouse=a
-        inoremap <c-p> <c-v>
-        cnoremap <c-p> <c-v>
-        inoremap <c-v> <c-r><c-p>+
-        inoremap <c-v> <c-r><c-p>+
-        cnoremap <c-v> <c-r>+
-		nnoremap <c-v> p
-        nnoremap <M-v> <c-v>
-        inoremap <M-v> <c-v>
-        nnoremap <M-a> ggVG
+        set mouse=a
+        if g:on_windows
+            " Windows-style: Ctrl-V pastes, Ctrl-P inserts literal char
+            inoremap <c-p> <c-v>
+            cnoremap <c-p> <c-v>
+            inoremap <c-v> <c-r><c-p>+
+            cnoremap <c-v> <c-r>+
+            nnoremap <c-v> p
+            nnoremap <M-v> <c-v>
+            inoremap <M-v> <c-v>
+            nnoremap <M-a> ggVG
+        else
+            " Mac-style: Cmd-V pastes; Ctrl-V keeps its default (visual block /
+            " literal-char insert), so the editor behaves unix-like.
+            inoremap <D-v> <c-r><c-p>+
+            cnoremap <D-v> <c-r>+
+            nnoremap <D-v> p
+            vnoremap <D-v> "+p
+            nnoremap <D-a> ggVG
+            nnoremap <D-c> "+y
+            vnoremap <D-c> "+y
+            vnoremap <D-x> "+d
+        endif
 		"nmap <D-v> p
 		"imap <D-V> 
 		"imap <D-v> 
@@ -392,7 +454,10 @@ silent! nunmap ,t
 silent! nunmap @Þ
 silent! norm! `M
 "call SetFont()
+if !(g:on_windows)
 let &guifont="Inconsolata Nerd Font:h11"
+endif
+
 endfunction
 
 function! LazyIt(a)

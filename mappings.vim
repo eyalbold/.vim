@@ -1711,48 +1711,52 @@ nmap <leader>ON <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><CMD>e ~/.vim/myinit.
 "nnoremap <leader>oE <CMD>!
 
 function! TermLOV()
-    set splitright
-    let t=&shell
-    set shell=cmd.exe
-    let g:neoterm_shell = "wsl" 
-    vertical Tnew "~/"
-    let &shell=t
+    if g:on_windows
+        set splitright
+        let t=&shell
+        set shell=cmd.exe
+        let g:neoterm_shell = "wsl"
+        vertical Tnew "~/"
+        let &shell=t
+    else
+        echo "TermLOV (WSL) is Windows-only"
+    endif
 endfunction
 
 function! TermOV(use_file_dir)
     call CloseVspIfNeed()
-    let t=&shell
-    let g:neoterm_shell = executable('pwsh') ? 'pwsh' : 'powershell'
-    set shell=cmd.exe
-	set splitright
-	let k=g:neoterm.last_id+1
-	vertical Tnew "~/"
-	"exe k."T . /etc/bashrc"
-	"exe k."T . ~/.bash_profile"
-	if a:use_file_dir
-		exe k."T cd " . expand('%:p:h')
-	"else
-		"exe k."T hookvim" 
-	endif  
-		"exe k."T set -o emacs"
-	"if g:on_ek_computer
-		"exe k."T bind '\"\\C-r\": \"\\C-ahstr -- \\C-j\"'"
-	"endif
-	exe k."Tclear"
-    let &shell=t
+    if g:on_windows
+        let t=&shell
+        let g:neoterm_shell = executable('pwsh') ? 'pwsh' : 'powershell'
+        set shell=cmd.exe
+        set splitright
+        let k=g:neoterm.last_id+1
+        vertical Tnew "~/"
+        if a:use_file_dir
+            exe k."T cd " . expand('%:p:h')
+        endif
+        exe k."Tclear"
+        let &shell=t
+    else
+        let l:cwd = a:use_file_dir ? expand('%:p:h') : expand('~')
+        call luaeval('Snacks.terminal.open(nil, { cwd = _A, win = { position = "right", width = 0.4 } })', l:cwd)
+    endif
 endfunction
 
 function! TermO()
-	let k=g:neoterm.last_id+1
-	Tnew
-
-	exe k."T . /etc/bashrc"
-	exe k."T . ~/.bash_profile"
-	exe k."T set -o emacs"
-	if g:on_ek_computer
-	exe k."T bind '\"\\C-r\": \"\\C-ahstr -- \\C-j\"'"
-	endif
-	exe k."Tclear"
+    if g:on_windows
+        let k=g:neoterm.last_id+1
+        Tnew
+        exe k."T . /etc/bashrc"
+        exe k."T . ~/.bash_profile"
+        exe k."T set -o emacs"
+        if g:on_ek_computer
+            exe k."T bind '\"\\C-r\": \"\\C-ahstr -- \\C-j\"'"
+        endif
+        exe k."Tclear"
+    else
+        call luaeval('Snacks.terminal.open()')
+    endif
 endfunction
 
 "open terminal in new tab
@@ -3081,7 +3085,7 @@ for i in range(char2nr('0'), char2nr('9'))
   execute 'silent! let g:char2code["\<M-' . char . '>"] = ''<M-' . char . '>'''
 endfor
 " Special characters
-for char in [' ', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', '\', '|', ';', ':', "'", '"', ',', '.', '<', '>', '/', '?', '`', '~']
+for char in [' ', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', '\', '|', ';', ':', '"', ',', '.', '/', '?', '`', '~']
   let g:char2code[char] = char
   execute 'silent! let g:char2code["\<C-' . char . '>"] = ''<C-' . char . '>'''
   execute 'silent! let g:char2code["\<A-' . char . '>"] = ''<A-' . char . '>'''
