@@ -531,7 +531,7 @@ let g:Lf_WindowPosition = 'popup'
 
 ""ideally would be called each time
 let g:Lf_PopupPosition=[max([float2nr(&lines * 0.4),10]),1]
-let g:Lf_CacheDirectory = g:user_home.'\.vim\lcache'
+let g:Lf_CacheDirectory = g:user_home.'/.vim/lcache'
 let g:Lf_IndexTimeLimit =7
 let g:Lf_RgConfig = [ "--max-columns=150"]
 let g:Lf_WorkingDirectoryMode = 'c'

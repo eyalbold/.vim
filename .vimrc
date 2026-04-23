@@ -35,7 +35,7 @@ let g:no_spec_map=1
 let g:vimloc=split(&packpath,',')[0]
 
 if g:minimal == 0
-    exe 'source' . " " . g:vimloc . "\\vimsettings.vim"
+    exe 'source' . " " . g:vimloc . "/vimsettings.vim"
 endif
 
 "let &shell='/usr/bin/bash --login'
@@ -102,37 +102,37 @@ endif
 " Plug 'severin-lemaignan/vim-minimap'
 
 function! Runit() 
-    exe 'silent source' . " " . g:vimloc . "\\pluginSettings.vim"
-    exe 'silent source' . " " . g:vimloc . "\\newplug.vim"
-exe 'silent source' . " " . g:vimloc . "\\t.lua"
-exe 'silent source' . " " . g:vimloc    . "\\secret.vim"
+    exe 'silent source' . " " . g:vimloc . "/pluginSettings.vim"
+    exe 'silent source' . " " . g:vimloc . "/newplug.vim"
+exe 'silent source' . " " . g:vimloc . "/t.lua"
+exe 'silent source' . " " . g:vimloc    . "/secret.vim"
     
-exe 'silent source' . " " . g:vimloc . "\\hacks.vim"
-exe 'lua' . " dofile('" . substitute(g:vimloc,'\','\\\\',"g") . "\\\\myinit.lua')"
+exe 'silent source' . " " . g:vimloc . "/hacks.vim"
+exe 'lua' . " dofile('" . substitute(g:vimloc,'\','//',"g") . "//myinit.lua')"
 
 "include math mappings
-if filereadable(" " . g:vimloc . "\\math.vim")
-	exe 'silent source' . " " . g:vimloc . "\\math.vim"
+if filereadable(" " . g:vimloc . "/math.vim")
+	exe 'silent source' . " " . g:vimloc . "/math.vim"
 endif
 
-exe 'silent source' . " " . g:vimloc . "\\mappings.vim"
+exe 'silent source' . " " . g:vimloc . "/mappings.vim"
 silent source c:\temp\quicksel.vim
 endfunction
 
 if g:minimal==0
     call Runit()
 else
-    "exe 'source' . " " . g:vimloc . "\\newplug.vim"
-    "exe 'source' . " " . g:vimloc . "\\t.lua"
+    "exe 'source' . " " . g:vimloc . "/newplug.vim"
+    "exe 'source' . " " . g:vimloc . "/t.lua"
       "Lazy load airlinv
       "Lazy load quick-scopv
-	"exe 'source' . " " . g:vimloc . "\\hacks.vim"
+	"exe 'source' . " " . g:vimloc . "/hacks.vim"
 	"call CustomSources("newplug.vim") 
-	"exe 'lua' . " dofile('" . substitute(g:vimloc,'\','\\\\',"g") . "\\\\myinit.lua')"
-	exe 'source' . " " . g:vimloc . "\\mappings.vim"
+	"exe 'lua' . " dofile('" . substitute(g:vimloc,'\','//',"g") . "//myinit.lua')"
+	exe 'source' . " " . g:vimloc . "/mappings.vim"
 	"exe 
 endif 
 if g:on_ek_computer 
-    "py3 exec(open('c:\\Users\\ekarni\\mypy\\voicerec.py','rt').read())
+    "py3 exec(open('c:/Users/ekarni/mypy/voicerec.py','rt').read())
 endif
 

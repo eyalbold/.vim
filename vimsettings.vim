@@ -5,12 +5,20 @@ set dictionary=C:\temp\words
 "Should be indepdenent of plugins!
 let $LC_ALL="en_US.UTF-8"
 let $LANG="en_US.UTF-8"
-let g:user_home = $USERPROFILE
-let g:python3_host_prog=g:user_home.'\.pyenv\pyenv-win\versions\3.13.11\python.exe'
-let g:python_host_prog=g:user_home.'\.pyenv\pyenv-win\versions\3.13.11\python.exe'
-let $PYENV_ROOT=g:user_home.'\.pyenv\pyenv-win'
+if has('win32') || has('win64')
+    let g:on_windows=1
+    let g:user_home = $USERPROFILE
+    let g:python3_host_prog=g:user_home.'\.pyenv\pyenv-win\versions\3.13.11\python.exe'
+    let g:python_host_prog=g:user_home.'\.pyenv\pyenv-win\versions\3.13.11\python.exe'
+    let $PYENV_ROOT=g:user_home.'\.pyenv\pyenv-win'
+else
+    let g:on_windows=0
+    let g:user_home = $HOME
+    let g:python3_host_prog='/usr/local/bin/python3.13'
+    let g:python_host_prog='/usr/local/bin/python3.13'
+    let $PYENV_ROOT=g:user_home.'/.pyenv'
+endif
 let ver= "3.9.6" "system('pyenv version')
-let g:on_windows=1
 let g:pwmod=0
 let g:sh = &shell
 let g:shf=&shellcmdflag
@@ -96,7 +104,8 @@ filetype plugin indent on
 "
 "set noswapfile
 "for swap files
-let &directory=g:user_home.'\.vim\swap'
+let &directory=g:user_home.'/.vim/swap'
+if !isdirectory(&directory) | call mkdir(&directory, "p", 0700) | endif
 set shortmess=a  "added now
 set shm+=A
 set shortmess+=A
@@ -133,14 +142,14 @@ endif
 
 
 
-if !isdirectory($HOME."\\.vim")
-	call mkdir($HOME."\\.vim", "", 0770)
+if !isdirectory($HOME."/.vim")
+	call mkdir($HOME."/.vim", "", 0770)
 endif
-if !isdirectory($HOME."\\.vim\\undo")
-	call mkdir($HOME."\\.vim\\undo", "", 0700)
+if !isdirectory($HOME."/.vim/undo")
+	call mkdir($HOME."/.vim/undo", "", 0700)
 endif
 
-set undodir=~\\.vim\\undo
+set undodir=~/.vim/undo
 set undofile
 
 "important autocmds
@@ -425,8 +434,10 @@ autocmd filetype vim let b:auto_save = 1
 
 
 
-"let $PATH="C:\\Users\\ekarni\\.pyenv\\pyenv-win\\versions\\3.9\\Scripts;". $PATH 
-let $PATH=g:user_home.'\AppData\Local\SumatraPDF;'. $PATH
+"let $PATH="C:\\Users\\ekarni\\.pyenv\\pyenv-win\\versions\\3.9\\Scripts;". $PATH
+if g:on_windows
+    let $PATH=g:user_home.'\AppData\Local\SumatraPDF;'. $PATH
+endif
 "autocmd! TermEnter * :startinsert
 
 "commands
