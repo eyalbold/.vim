@@ -641,7 +641,7 @@ pattern = '*',
 callback = function()
 local filename = vim.api.nvim_buf_get_name(0)
 if filename ~= '' then
-local file = io.open('c:\\temp\\active_buffer', 'w')
+local file = io.open(vim.fn.expand('~/temp/active_buffer'), 'w')
 if file then
 file:write(filename)
 file:close()

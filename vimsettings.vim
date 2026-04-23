@@ -1,5 +1,5 @@
 
-set dictionary=C:\temp\words
+let &dictionary=expand('~/temp/words')
 "Vim settings
 "includes autocmds and autocmds for file types and commands
 "Should be indepdenent of plugins!
@@ -331,7 +331,7 @@ let g:GuiLoaded=1
         endif
         set shell=cmd 
 
-        exec "silent !echo ". v:servername . " > c:\\temp\\listen.txt"
+        exec "silent !echo ". v:servername . " > " . expand('~/temp/listen.txt')
         "override
         nmap <D-f> <Plug>(easymotion-s2) 
 
@@ -392,6 +392,7 @@ silent! nunmap ,t
 silent! nunmap @Þ
 silent! norm! `M
 "call SetFont()
+let &guifont="Inconsolata Nerd Font:h11"
 endfunction
 
 function! LazyIt(a)
@@ -437,6 +438,8 @@ autocmd filetype vim let b:auto_save = 1
 "let $PATH="C:\\Users\\ekarni\\.pyenv\\pyenv-win\\versions\\3.9\\Scripts;". $PATH
 if g:on_windows
     let $PATH=g:user_home.'\AppData\Local\SumatraPDF;'. $PATH
+else
+    let $PATH=g:user_home.'/.local/bin:'. $PATH
 endif
 "autocmd! TermEnter * :startinsert
 

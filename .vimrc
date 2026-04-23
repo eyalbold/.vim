@@ -116,7 +116,7 @@ if filereadable(" " . g:vimloc . "/math.vim")
 endif
 
 exe 'silent source' . " " . g:vimloc . "/mappings.vim"
-silent source c:\temp\quicksel.vim
+silent execute 'source ' . expand('~/temp/quicksel.vim')
 endfunction
 
 if g:minimal==0

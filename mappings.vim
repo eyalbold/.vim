@@ -2570,7 +2570,7 @@ endfunction
      let a= map(a, {idx,fname -> fnamemodify(fname, ':p')})
      :endif 
      ":echo a
-     :call writefile(a,'c:\temp\filelist.txt')
+     :call writefile(a,expand('~/temp/filelist.txt'))
      try
          echohl Question
          let pattern = input("Search pattern: ")
@@ -2578,7 +2578,7 @@ endfunction
      finally
          echohl None
      endtry
-     exec printf("Leaderf rg --filelist c:\\temp\\filelist.txt %s\"%s\"", pattern =~ '^\s*$' ? '' : '-e ', pattern )
+     exec printf("Leaderf rg --filelist %s %s\"%s\"", expand('~/temp/filelist.txt'), pattern =~ '^\s*$' ? '' : '-e ', pattern )
      if (a:curfile)
  
          :exe ':cd '.tmp
@@ -2601,14 +2601,14 @@ endfunction
      finally
          echohl None
      endtry
-     exec printf("Leaderf rg --filelist c:\\temp\\filelist.txt %s\"%s\"", pattern =~ '^\s*$' ? '' : '-e ', pattern )
+     exec printf("Leaderf rg --filelist %s %s\"%s\"", expand('~/temp/filelist.txt'), pattern =~ '^\s*$' ? '' : '-e ', pattern )
      if (a:curfile)
  
          :exe ':cd '.tmp
      endif 
  endfunction 
  function! ReplaceInFiles(path, pattern)
-     let f=readfile('c:\temp\filelist.txt')
+     let f=readfile(expand('~/temp/filelist.txt'))
      " Validate pattern format /search/replace/
      if a:pattern !~ '^/.*/.*/\?$'
          echoerr "Invalid pattern format. Use /search/replace/"
@@ -2652,8 +2652,8 @@ endfunction
      let a= map(a, {idx,fname -> fnamemodify(fname, ':p')})
      :endif 
      ":echo a
-     :call writefile(a,'c:\temp\filelist.txt')
-     exec printf("Leaderf rg --filelist c:\\temp\\filelist.txt %s\"%s\"", pattern =~ '^\s*$' ? '' : '-e ', pattern )
+     :call writefile(a,expand('~/temp/filelist.txt'))
+     exec printf("Leaderf rg --filelist %s %s\"%s\"", expand('~/temp/filelist.txt'), pattern =~ '^\s*$' ? '' : '-e ', pattern )
      if (a:curfile)
  
          :exe ':cd '.tmp
