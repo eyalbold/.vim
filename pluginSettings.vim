@@ -570,8 +570,11 @@ let g:fzf_action = {'ctrl-o' : '!open'}
 let g:fzf_history=  g:user_home.'\.fzf\history_f'
 if g:on_windows
     set shell=cmd.exe
-endif
-let $FZF_DEFAULT_OPTS="--history=" . ('C:/Users/EyalKarni/.fzf/history_file')
+    let $FZF_DEFAULT_OPTS="--history=" . ('C:/Users/EyalKarni/.fzf/history_file')
+else
+
+let $FZF_DEFAULT_OPTS="--history=" . (g:user_home .  '/.fzf/history_file')
+endif 
 " had to change ~/.fzf to add escape for default_OPTS
 "#. "\\.fzf\\history_file"
 "nvim-ipy stuff
@@ -607,31 +610,34 @@ let g:vimtex_fold_enabled =1
 "autocmd BufEnter *.tex set foldexpr=vimtex#fold#level(v:lnum)
 "autocmd BufEnter *.tex set foldtext=vimtex#fold#text()
 "
-"let g:vimtex_view_method = 'skim'
-let g:vimtex_view_method = 'general'
-let g:vimtex_compiler_progname = 'nvr'
-"    \ 'build_dir' : '/tmp/builddir',
-  let g:vimtex_view_general_viewer = 'SumatraPDF'
-  let g:vimtex_view_general_options
-      \ = '-reuse-instance -forward-search @tex @line @pdf'
-  let g:vimtex_view_general_options_latexmk = '-reuse-instance'
+if g:on_windows
+    let g:vimtex_view_method = 'general'
+    let g:vimtex_compiler_progname = 'nvr'
+    let g:vimtex_view_general_viewer = 'SumatraPDF'
+    let g:vimtex_view_general_options
+        \ = '-reuse-instance -forward-search @tex @line @pdf'
+else
+    let g:vimtex_view_method = 'skim'
+endif
 
-let g:vimtex_compiler_latexmk = {
-    \ 'backend' : 'nvim',
-    \ 'background' : 1,
-    \ 'callback' : 1,
-    \ 'continuous' : 1,
-    \ 'executable' : 'latexmk',
-    \ 'options' : [
-    \ '-g',
-    \ '-f-',
-    \   '-no-shell-escape',
-    \   '-verbose',
-    \   '-file-line-error',
-    \   '-synctex=1',
-    \   '-interaction=nonstopmode',
-    \ ],
-    \}
+if executable('latexmk')
+    let g:vimtex_compiler_latexmk = {
+        \ 'backend' : 'nvim',
+        \ 'background' : 1,
+        \ 'callback' : 1,
+        \ 'continuous' : 1,
+        \ 'executable' : 'latexmk',
+        \ 'options' : [
+        \ '-g',
+        \ '-f-',
+        \   '-no-shell-escape',
+        \   '-verbose',
+        \   '-file-line-error',
+        \   '-synctex=1',
+        \   '-interaction=nonstopmode',
+        \ ],
+        \}
+endif
 "custom vimtex settings
  let g:mathshortcuts = ''
 
@@ -811,7 +817,11 @@ augroup end
  let g:EasyMotion_leader_key='\rs'
 
 let g:ctrlsf_backend = 'rg'
-let g:Lf_Rg='C:\ProgramData\chocolatey\bin\rg.EXE'
+if g:on_windows
+    let g:Lf_Rg='C:\ProgramData\chocolatey\bin\rg.EXE'
+else
+    let g:Lf_Rg=g:user_home.'/.local/bin/rg'
+endif
 let g:neoformat_enabled_powershell=['PowerShellBeautifier']
 
 

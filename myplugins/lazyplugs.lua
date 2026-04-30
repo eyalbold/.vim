@@ -233,7 +233,7 @@ opts = {
   -- your configuration comes here
   -- or leave it empty to use the default settings
   -- refer to the configuration section below
-  terminal = {enabled=false },
+  terminal = { enabled = true },
   bigfile = { enabled = true },
   dashboard = { enabled = false },
   explorer = { enabled = false },
@@ -283,6 +283,17 @@ opts = {
     }
     require("telescope").load_extension "frecency"
   end,
+},
+{
+  "lervag/vimtex",
+  ft = { "tex", "plaintex", "latex" },
+  init = function()
+    vim.g.tex_flavor = "latex"
+  end,
+},
+{
+  "matze/vim-tex-fold",
+  ft = { "tex", "plaintex", "latex" },
 }
 
 }

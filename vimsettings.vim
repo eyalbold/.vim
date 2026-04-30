@@ -455,7 +455,9 @@ silent! nunmap @Þ
 silent! norm! `M
 "call SetFont()
 if !(g:on_windows)
-let &guifont="Inconsolata Nerd Font:h11"
+"let &guifont="Inconsolata LGC Nerd Font:h14"
+"let &guifont="SauceCodePro Nerd Font Mono:h14"
+let &guifont="Hasklug Nerd Font:h14:l"
 endif
 
 endfunction
