@@ -230,6 +230,9 @@ return {
                  on_attach = on_attach,
                 settings = {
                     pylsp = {
+                        rope = {
+                            ropeFolder = vim.NIL, -- null = no folder; prevents .ropeproject in every opened dir
+                        },
                         plugins = {
                             pycodestyle = {
                                 enabled = false,

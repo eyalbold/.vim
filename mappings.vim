@@ -443,10 +443,21 @@ if g:on_ek_computer
 " Pick from recently visited windows (Telescope)
 nmap _U <CMD>Telescope my_last_windows<CR>
 endif
-" cd to parent directory
-nmap _. <CMD>cd ..<CR>
-" cd to previous directory
-nmap _- <CMD>cd -<CR>
+" _m: toggle cd mode between global and tab-local (tcd)
+let g:cd_mode = 'tab'
+function! CdModeCmd(dir)
+    if g:cd_mode == 'tab'
+        exe 'tcd ' . a:dir
+    else
+        exe 'cd ' . a:dir
+    endif
+    echo 'cd (' . g:cd_mode . '): ' . getcwd()
+endfunction
+nmap _m <CMD>let g:cd_mode = (g:cd_mode == 'tab' ? 'global' : 'tab') \| echo 'cd mode: ' . g:cd_mode<CR>
+" _.: cd to parent directory
+nmap _. <CMD>call CdModeCmd('..')<CR>
+" _-: cd to previous directory
+nmap _- <CMD>call CdModeCmd('-')<CR>
 "previous window
 nmap _P <CMD>wprevious<CR>
 nmap _N <CMD>wnext<CR>
@@ -764,6 +775,7 @@ inoremap <m-s> <c-o>?\c
 
 
 " c-f: set mark H (save position for later recall with ml)
+nmap <c-t> <cmd>tabnew<CR>
 nmap <c-f> mH
 "nmap <c-g> <CMD>call CocActionAsync("doHover")<cr>
 
@@ -791,6 +803,8 @@ imap <Insert> <ESC>
 " Insert key in normal: start special insert mode
 nmap <Insert> <CMD>call StartSpecialInsert()<CR>i
 
+" c-w (normal): close current tab
+nmap <c-w> <CMD>tabclose<CR>
 " c-w (insert): delete previous word (like bash)
 imap <c-w> <c-o>db
 " M-Right/Left (insert): move by WORD forward/backward
@@ -1015,10 +1029,13 @@ nmap <m-m> <cmd>bnext<CR>
 nmap mC <CMD>call CopyPath()<CR>
 " mc: cd to current file's directory
 noremap mc <CMD>cd %:p:h<CR>
+" mlc / \mc: tcd to current file's directory (tab-local cd, affects all windows in tab)
+noremap mlc <CMD>tcd %:p:h<CR>
+noremap \mc <CMD>tcd %:p:h<CR>
 " md: refresh diff (diffupdate)
 nnoremap md <CMD>diffupdate<CR>
 " mf: open current file's folder in Explorer
-nnoremap mf <CMD>!start %:p:h<CR>
+nnoremap mf <CMD>!open %:p:h<CR>
 " \mF: open cwd in file manager
 nnoremap <leader>mF <CMD>exec '!open '.getcwd()<CR>
 " mF: execute current function (select function + F2)
@@ -1336,9 +1353,11 @@ nnoremap <silent> <C-a>h <CMD>call FZFOpen(':History')<CR>
 nmap <silent> <C-a>H <CMD>call fzf#run({'source':"cat ~/.bash_history \<bar> sort \<bar> uniq",'sink': function('BH')})<CR>
 nnoremap <silent> <C-a>a <CMD>call FZFOpen(':Ag')<CR>
 "nnoremap <silent> <C-a>d <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('CdDirPlug'),'options': '-m'})<CR>
-" C-a d: directory picker (cd to selected dir)
+" C-a d: directory picker (global cd to selected dir)
 nnoremap <silent> <C-a>d <CMD>call FzfDirSelect()<CR>
-" C-a D: directory picker then open a file in that dir
+" C-a t: directory picker (tcd to selected dir, tab-local)
+nnoremap <silent> <C-a>t <CMD>call FzfDirSelectTcd()<CR>
+" C-a D: directory picker (tcd to selected dir, tab-local)
 nnoremap <silent> <C-a>D <CMD>call FzfDirChooseFile()<CR>
 "nnoremap <silent> <C-a>D <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('CdDir'),'options': '-m'})<CR>
 "nnoremap <silent> <C-a>w <CMD>call FZFOpen(':Windows')<CR>
@@ -1356,22 +1375,21 @@ nnoremap <silent> <C-a><C-a> <C-a>
 "
 nmap <leader>W <CMD>set wrap<CR>
 
-function! GitDir()
-let top = systemlist("git rev-parse --show-toplevel")[0]
-return top . "/.git"
+function! GitTopLevel()
+return trim(system("git rev-parse --show-toplevel"))
 endfunction
 
-"does diff of all files (could be vs version) 
+"does diff of all files (could be vs version)
 function! GCWDComplete(A, L, P) abort
-return fugitive#Complete(a:A, a:L, a:P, {'git_dir': GitDir()})
+return fugitive#Complete(a:A, a:L, a:P, {'dir': GitTopLevel()})
 endfunction
 
-command! -bang -nargs=? -range=-1 -complete=customlist,GCWDComplete GCWD exe fugitive#Command(<line1>, <count>, +"<range>", <bang>0, "<mods>", <q-args>,   { 'git_dir': GitDir() })
+command! -bang -nargs=? -range=-1 -complete=customlist,GCWDComplete GCWD exe fugitive#Command(<line1>, <count>, +"<range>", <bang>0, "<mods>", <q-args>,   { 'dir': GitTopLevel() })
 
 " mg: fugitive status for cwd git root (GCWD command)
 nmap mg <CMD>GCWD<CR>
-" mG: reset b:git_dir + open standard fugitive status
-nmap mG <CMD>unlet b:git_dir<CR><CMD>G<CR>
+" mG: fugitive status for current buffer's git root (worktree-aware)
+nmap mG <CMD>execute 'Git -C ' . fnameescape(expand('%:p:h'))<CR>
 
 
 " \g2 / \g3: diffget from buffer 2 or 3 (3-way merge)
@@ -1690,6 +1708,8 @@ nmap <leader>of <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><CMD>call fzf#run({'s
 " jupyter buffer
 " \op: open Jupyter buffer in a horizontal split
 nmap <leader>op :sp <bar> :exec ':'. bufnr("\[jupyter\]") .'buffer'<CR><c-w>k
+" \oC: focus Claude panel matching current cwd (falls back to any claude terminal)
+nmap <leader>oC <CMD>lua FocusClaudeCwd()<CR>
 nmap <leader>upd \ttupama
 
 
@@ -1699,6 +1719,8 @@ nnoremap <leader>oi <CMD>call RecallInserts(0)<CR>
 nnoremap <leader>OI <CMD>call GetAllInserts()<CR>
 " \ol: open loclist
 nnoremap <leader>ol <CMD>lopen<CR>
+" \oF: open file path from clipboard
+nnoremap <leader>oF :e <C-R>=trim(@+)<CR><CR>
 " \ov: open newplug.vim in tab
 nnoremap <leader>ov <CMD>TN ~/.vim/newplug.vim<CR>
 " \om / \OM: open mappings.vim in tab / vsplit
@@ -3150,9 +3172,18 @@ nmap <leader>AF :Af =expand('%:p:h')<CR>
  endfunction
  
  function! FzfDirSelect()
+     let l:zoxide = systemlist('zoxide query --list 2>/dev/null')
+     let l:all = uniq(sort(map(copy(g:dirs), 'tolower(v:val)') + l:zoxide))
+     call fzf#run({
+         \ 'source': l:all,
+         \ 'sink': function('CdDirPlug'),
+         \ 'options': '--preview "ls {} | head -50"'
+     \ })
+ endfunction
+ function! FzfDirSelectTcd()
      call fzf#run({
          \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
-         \ 'sink': function('CdDirPlug'),
+         \ 'sink': function('TcdDirPlug'),
          \ 'options': '--preview "ls {} | head -50"'
      \ })
  endfunction
@@ -3160,7 +3191,7 @@ nmap <leader>AF :Af =expand('%:p:h')<CR>
  function! FzfDirChooseFile()
      call fzf#run({
          \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
-         \ 'sink': function('ChooseFile'),
+         \ 'sink': function('TcdDirPlug'),
          \ 'options': '-i --preview "ls {} | head -50"'
      \ })
  endfunction
@@ -3197,3 +3228,56 @@ function! OpenLazyplugs()
     exe 'e '.g:user_home.'\.vim\myplugins\lazyplugs.lua'
 endfunction
 nmap <leader>lp :call OpenLazyplugs()<CR>
+
+" Mermaid (.mmd) compile-on-save
+function! s:MmdReport(name, code, err) abort
+    if a:code == 0
+        echohl MoreMsg | echom 'mmd compile OK: ' . a:name | echohl None
+    else
+        echohl ErrorMsg | echom 'mmd compile FAIL(' . a:code . '): ' . a:name . (empty(a:err) ? '' : ' — ' . a:err) | echohl None
+    endif
+endfunction
+
+function! CompileMmd() abort
+    let l:src    = expand('%:p')
+    let l:name   = expand('%:t')
+    let l:dst    = expand('%:p:r') . '.pdf'
+    let l:script = expand('~/research/compile_mmd.sh')
+    let l:node   = expand('~/.nvm/versions/node/v24.15.0/bin')
+    let l:cmd    = ['sh', '-c',
+        \ printf('PATH=%s:$PATH %s %s %s',
+        \   shellescape(l:node),
+        \   shellescape(l:script),
+        \   shellescape(l:src),
+        \   shellescape(l:dst))]
+    echo 'mmd compiling: ' . l:name . '...'
+    if has('nvim')
+        let l:stderr_lines = []
+        call jobstart(l:cmd, {
+            \ 'on_stderr': {_, data, __ -> extend(l:stderr_lines, filter(copy(data), '!empty(v:val)'))},
+            \ 'on_exit':   {_, code, __ -> s:MmdReport(l:name, code, join(l:stderr_lines, ' | '))},
+            \ })
+    else
+        let l:stderr_lines = []
+        call job_start(l:cmd, {
+            \ 'err_cb':  {_, msg -> add(l:stderr_lines, msg)},
+            \ 'exit_cb': {_, code -> s:MmdReport(l:name, code, join(l:stderr_lines, ' | '))},
+            \ })
+    endif
+endfunction
+
+function! ToggleMmdAutoCompile() abort
+    let b:mmd_autocompile = !get(b:, 'mmd_autocompile', 1)
+    echo 'mmd autocompile (' . expand('%:t') . '): ' . (b:mmd_autocompile ? 'ON' : 'OFF')
+endfunction
+
+augroup MmdAutoCompile
+    autocmd!
+    autocmd BufWritePost *.mmd if get(b:, 'mmd_autocompile', 1) | call CompileMmd() | endif
+augroup END
+
+augroup MmdMappings
+    autocmd!
+    autocmd BufRead,BufNewFile *.mmd nnoremap <buffer> <leader>mc :call CompileMmd()<CR>
+    autocmd BufRead,BufNewFile *.mmd nnoremap <buffer> <leader>ma :call ToggleMmdAutoCompile()<CR>
+augroup END

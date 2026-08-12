@@ -21,6 +21,7 @@ return {
         -- optional for icon support
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
+            local actions = require("fzf-lua").actions
             -- calling `setup` is optional for customization
             require("fzf-lua").setup({
                 winopts = {
@@ -31,6 +32,29 @@ return {
                     preview = {
                         layout     = "horizontal",
                         horizontal = "right:55%",
+                    },
+                },
+                keymap = {
+                    fzf = {
+                        -- free alt-g from its default "first" binding so files action can use it
+                        ["alt-g"] = false,
+                    },
+                },
+                files = {
+                    -- show hidden files, exclude diff/patch files
+                    cmd = "rg --files --hidden --glob '!*.diff' --glob '!*.patch'",
+                    actions = {
+                        -- macOS terminals eat Option/Alt, so move the alt-* file actions to ctrl-*
+                        ["alt-i"] = false,
+                        ["alt-h"] = false,
+                        ["alt-f"] = false,
+                        ["alt-q"] = false,
+                        ["alt-Q"] = false,
+                        ["ctrl-g"] = { fn = actions.toggle_ignore, reuse = true, header = false }, -- toggle gitignore
+                        ["ctrl-d"] = { fn = actions.toggle_hidden, reuse = true, header = false }, -- toggle hidden/dotfiles
+                        ["ctrl-l"] = { fn = actions.toggle_follow, reuse = true, header = false }, -- toggle follow symlinks
+                        ["ctrl-q"] = actions.file_sel_to_qf, -- send selection to quickfix
+                        ["ctrl-y"] = actions.file_sel_to_ll, -- send selection to loclist
                     },
                 },
             })
@@ -161,6 +185,7 @@ return {
     { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
     { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
     { "<leader>aS", "<cmd>call CloseClaudeBufferInWindow()<cr><cmd>ClaudeCodeStart!<cr>", desc = "Claude Force Start" },
+    { "<leader>av", "<cmd>lua ClaudeVSplit()<cr>", desc = "Claude in vsplit" },
     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
     { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },

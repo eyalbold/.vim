@@ -1,6 +1,6 @@
 return {
         'milanglacier/minuet-ai.nvim',
-        enabled=false,
+        enabled=true,
         event = { 'BufReadPre' },
         config = function()
             require('minuet').setup {
@@ -8,7 +8,7 @@ return {
                 request_timeout = 2,
                 throttle = 2000,
                 virtualtext = {
-                    auto_trigger_ft = { 'lua', 'python', 'javascript', 'typescript', 'vim', 'go', 'rust', 'c', 'cpp' },
+                    auto_trigger_ft = { 'lua', 'python', 'javascript', 'typescript', 'vim', 'go', 'rust', 'c', 'cpp' ,'tex','markdown'},
                     keymap = {
                         accept = '<C-j>',
                         accept_line = '<M-w>',
@@ -50,7 +50,7 @@ return {
                     },
                     claude = {
                         max_tokens = 556,
-                        model = 'claude-haiku-4.5',
+                        model = 'claude-haiku-4-5',
                         stream = true,
                         api_key = 'ANTHROPIC_MINUET_API_KEY',
                     }

@@ -5,6 +5,8 @@ let &dictionary=expand('~/temp/words')
 "Should be indepdenent of plugins!
 let $LC_ALL="en_US.UTF-8"
 let $LANG="en_US.UTF-8"
+let $PATH= expand("/Users/eyalkarni/.dotnet/tools:$HOME/.nvm/versions/node/v24.15.0/bin:$HOME/bin:$HOME/.local/bin:/usr/local/bin:$HOME/.local/bin:"). $PATH
+
 if has('win32') || has('win64')
     let g:on_windows=1
     let g:user_home = $USERPROFILE
