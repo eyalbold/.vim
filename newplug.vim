@@ -37,7 +37,8 @@ Plugit 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plugit 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plugit 'yegappan/mru'
 Plugit 'tamago324/nlsp-settings.nvim'
-Plugit 'github/copilot.vim', {'event': 'VeryLazy'}
+"Plugit 'github/copilot.vim', {'event': 'VeryLazy'}
+
 "Plugit 'sheepy9/gipity.nvim', {'event':'VeryLazy'}
 Plugit 'nvimtools/none-ls.nvim'
 Plugit 'junegunn/fzf.vim'

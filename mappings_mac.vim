@@ -7,11 +7,18 @@ nnoremap <leader>mF <CMD>execute '!open ' . shellescape(getcwd())<CR>
 " Preserve the Mac branch's repo shortcut after the common Git mappings load.
 nmap <leader>gc <CMD>cd ~/compare-my-stocks<CR>
 
-" On Mac, this picker changes the tab-local directory.
+" On Mac, this picker changes the tab-local directory, then picks a file in it.
+" The file picker must be deferred: fzf.vim's window is still tearing down when
+" the sink runs, so a synchronous FzfLua files never opens.
+function! TcdChooseFile(item) abort
+    call TcdDirPlug(a:item)
+    call timer_start(10, {-> execute('FzfLua files')})
+endfunction
+
 function! FzfDirChooseFile() abort
     call fzf#run({
         \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
-        \ 'sink': function('TcdDirPlug'),
+        \ 'sink': function('TcdChooseFile'),
         \ 'options': '-i --preview "ls {} | head -50"'
     \ })
 endfunction
@@ -92,3 +99,24 @@ augroup MmdMappings
     autocmd BufRead,BufNewFile *.mmd nnoremap <buffer> <leader>mc :call CompileMmd()<CR>
     autocmd BufRead,BufNewFile *.mmd nnoremap <buffer> <leader>ma :call ToggleMmdAutoCompile()<CR>
 augroup END
+
+" ---------------------------------------------------------------------------
+" macOS: let Cmd (<D-...>) trigger every existing Meta (<M-...>) mapping.
+" nvim-qt does not reliably deliver Option/Meta, but Cmd arrives fine. These
+" are recursive aliases, so each forwards to whatever <M-...> resolves to at
+" press time — plain, <expr>, <script> and buffer-local targets all work.
+" ---------------------------------------------------------------------------
+if has('mac') && exists('*maplist')
+    let s:mode_cmd = {'n':'nmap', 'i':'imap', 'v':'vmap', 'x':'xmap',
+        \ 's':'smap', 'o':'omap', 'c':'cmap', 't':'tmap', '!':'map!', ' ':'map'}
+    for s:m in maplist()
+        if s:m.lhs =~? '<M-' && has_key(s:mode_cmd, s:m.mode)
+            execute s:mode_cmd[s:m.mode]
+                \ substitute(s:m.lhs, '<[Mm]-', '<D-', 'g') s:m.lhs
+        endif
+    endfor
+    unlet! s:m s:mode_cmd
+    " FileType-defined maps are not in maplist() yet at startup; add explicitly.
+    imap <D-]> <M-]>
+    imap <D-[> <M-[>
+endif

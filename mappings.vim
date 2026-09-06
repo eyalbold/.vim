@@ -274,7 +274,7 @@ while i <= 9
     let i = i + 1
 endwhile
 
-" CtrlSpace buffer/window switcher
+" CtrlSpace buffer/window switcher<D-p>
 nmap <S-Space> <CMD>CtrlSpace<CR>w
 
 
@@ -1943,15 +1943,15 @@ vnoremap <C-J> "xy:<CMD>call HandleCJ()<CR>
 nmap <leader><c-t> vaw:<CMD>Trans<CR>
 
 " \pc: open ChatGPT
-nmap <leader>pc <CMD>ChatGPT<CR>
+"nmap <leader>pc <CMD>ChatGPT<CR>
 " \pC: open ChatGPT + voice input
-nmap <leader>pC <CMD>ChatGPT<CR>:Voice<CR>
+"nmap <leader>pC <CMD>ChatGPT<CR>:Voice<CR>
 " c-u (insert): literal next char (replaces delete-to-BOL)
 inoremap <c-u> <c-v>
 " c-k (visual): open ChatGPT with selection as context (clears buffer)
-vmap <c-k> "xy<CMD>:ChatGPT<CR><Cmd>if &insertmode<Bar>stopinsert<Bar>endif<CR><CMD>%d _<CR>"xpgg^i
-" m-k (visual): open ChatGPT with selection prepended
-vmap <m-k> "xy<CMD>:ChatGPT<CR><Cmd>if &insertmode<Bar>stopinsert<Bar>endif<CR>"xpgg^i
+"vmap <c-k> "xy<CMD>:ChatGPT<CR><Cmd>if &insertmode<Bar>stopinsert<Bar>endif<CR><CMD>%d _<CR>"xpgg^i
+"" m-k (visual): open ChatGPT with selection prepended
+"vmap <m-k> "xy<CMD>:ChatGPT<CR><Cmd>if &insertmode<Bar>stopinsert<Bar>endif<CR>"xpgg^i
 " c-k (normal): open ChatGPT empty
 nnoremap <c-k> <CMD>:ChatGPT<CR>i
 " Space: toggle fold (or create fold in visual); replaces default Space
@@ -3190,7 +3190,7 @@ EOF
  nnoremap <leader>gc :call Gconfig()<CR>
 
 " mapping for \ad
-nnoremap <leader>ad <c-a>D
+nmap <leader>ad <c-a>D
 function! OpenLazyplugs()
     exe 'e '.g:user_home.'\.vim\myplugins\lazyplugs.lua'
 endfunction

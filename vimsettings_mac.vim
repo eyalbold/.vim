@@ -1,4 +1,9 @@
 " macOS-only globals and settings hooks.
+if exists('g:GuiLoaded')
+GuiMacOptionIsMeta both
+endif
+
+
 let g:on_windows = 0
 let g:user_home = $HOME
 let g:config_temp_dir = expand('~/temp')

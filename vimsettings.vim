@@ -158,15 +158,17 @@ au VimEnter * nested call OnLoad()
 au VimLeave * nested call OnEnd()
 au ExitPre * nested if exists('g:autosaveWS') | call timer_stop(g:autosaveWS) | endif
 function! SetAltFont()
-    set guifont=JetBrains\ Mono\ Medium:h
+    "set guifont=JetBrains\ Mono\ Medium:h12
 endfunction    
 function! SetFont()
 
     if exists('g:GuiLoaded')
         ":GuiFont! Fira\ Code:h12
-        "set guifont=Fira\ Code:h12
-        "set guifont =GoMono\ Nerd\ Font:h12 
-        "set guifont=Hasklug\ Nerd\ Font:h12
+        "set guifont=Fira\ Code\ aa:h12
+        set guifont=Hasklug\ Nerd\ Font\ Propo:h13
+        ":GuiFont! FiraCode Nerd Font Propo:h13
+        ":GuiFont! JetBrainsMono Nerd Font:h13
+        ":GuiFont! CaskaydiaCove Nerd Font Propo:h13
         "GuiFont! FiraCode\ Nerd\ Font
     endif
 endfunction
@@ -283,7 +285,7 @@ function! OnLoad()
 	"else
 		"nnoremap <c-s> :w<CR>
 	"endif
-let g:GuiLoaded=1
+"let g:GuiLoaded=1
 	call PlatformSettingsOnLoad()
 	"echom "ignore this no such mapping"
 if getcwd() ==# '/' || getcwd() =~? '[/\\]Windows[/\\]system32$'
@@ -315,7 +317,7 @@ silent! nunmap @Þ
 if argc()==0
 	silent! norm! `M
 endif
-"call SetFont()
+call SetFont()
 endfunction
 
 function! LazyIt(a)
