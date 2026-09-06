@@ -1355,6 +1355,8 @@ nnoremap <silent> <C-a>d <CMD>call FzfDirSelect()<CR>
 nnoremap <silent> <C-a>t <CMD>call FzfDirSelectTcd()<CR>
 " C-a D: directory picker then open a file in that dir
 nnoremap <silent> <C-a>D <CMD>call FzfDirChooseFile()<CR>
+" C-a W: git worktree picker (cd to selected worktree)
+nnoremap <silent> <C-a>W <CMD>call FzfWorktreeSelect()<CR>
 "nnoremap <silent> <C-a>D <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('CdDir'),'options': '-m'})<CR>
 "nnoremap <silent> <C-a>w <CMD>call FZFOpen(':Windows')<CR>
 " C-a w: tab picker (FzfLua)
@@ -1647,6 +1649,10 @@ nmap <m-o> mc<leader>vn<c-a>f
 nmap <m-i> mc<c-a>f
 " newv git root filefolder, all files
 nmap <m-'> mc<leader>vn<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]`<CR><c-a>f
+" git root filefolder, all files (same window; <m-'> is dead on mac)
+nmap <c-a>' mc<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]`<CR><c-a>f
+" newv git root filefolder, all files (mac-safe partner of <m-'>)
+nmap <c-a>" mc<leader>vn<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]`<CR><c-a>f
 "nmap <c-u> <CMD>Telescope lsp_workspace_symbols<CR>
 " LSP doc symbols
 " M-,: LSP document symbols (Telescope)
@@ -3021,6 +3027,8 @@ endfor
 " Special characters
 for char in [' ', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', '\', '|', ';', ':', "'", '"', ',', '.', '<', '>', '/', '?', '`', '~']
   let g:char2code[char] = char
+  " a bare " would terminate the generated string literal -> E111/E488
+  if char ==# '"' | continue | endif
   execute 'silent! let g:char2code["\<C-' . char . '>"] = ''<C-' . char . '>'''
   execute 'silent! let g:char2code["\<A-' . char . '>"] = ''<A-' . char . '>'''
   execute 'silent! let g:char2code["\<M-' . char . '>"] = ''<M-' . char . '>'''
@@ -3068,7 +3076,7 @@ nmap <leader>AF :Af =expand('%:p:h')<CR>
  endfunction
  function! ChooseFile(item)
      :exe "cd ".a:item
-     FzfLua files
+     call timer_start(10, {-> execute('FzfLua files')})
  endfunction
  function! ChooseVGFile(item)
      :exe "cd ".a:item
@@ -3100,7 +3108,19 @@ nmap <leader>AF :Af =expand('%:p:h')<CR>
      \ })
  endfunction
  
- function! FzfDirChooseFile()
+ function! CdWorktree(item)
+    call CdDirPlug(split(a:item)[0])
+endfunction
+function! FzfWorktreeSelect()
+    call fzf#run({
+        \ 'source': 'git worktree list',
+        \ 'sink': function('CdWorktree'),
+        \ 'options': '--preview "ls {1} | head -50"'
+    \ })
+endfunction
+command! Worktrees call FzfWorktreeSelect()
+
+function! FzfDirChooseFile()
      call fzf#run({
          \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
          \ 'sink': function('ChooseFile'),

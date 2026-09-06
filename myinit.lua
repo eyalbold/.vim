@@ -351,7 +351,7 @@ end
 vim.keymap.set("n", "mt", opencwd, opts)
 -- CMP configuration has been moved to myplugins/cmp.lua (loaded via Lazy.nvim)
 
-vim.lsp.set_log_level("warn")
+vim.lsp.log.set_level("warn")
 
 --
 -- require'lspconfig'.jedi_language_server.setup{
@@ -660,19 +660,18 @@ local function my_on_attach(bufnr)
 	---
 end
 
--- `:e some/dir` should root the tree at that dir. nvim-tree's own hijack only
--- does that when no explorer exists yet (it calls force_dirchange with
--- should_init=false), so an already-open tree keeps its old root. Must be
--- registered BEFORE setup() -- nvim-tree's BufEnter handler runs first
--- otherwise and wipes the directory buffer before we see it.
-vim.api.nvim_create_autocmd({ "BufEnter", "BufNewFile" }, {
+-- :e <dir>  ->  tcd there and re-root the tree.
+-- nvim-tree's hijack_directories only lcd's and keeps the old root once a tree exists.
+-- Must be registered BEFORE nvim-tree setup(): its hijack autocmd renames the buffer to NvimTree_N.
+vim.api.nvim_create_autocmd("BufEnter", {
+	nested = true,
 	callback = function(ev)
-		if not vim.api.nvim_buf_is_valid(ev.buf) then
-			return
-		end
-		local name = vim.api.nvim_buf_get_name(ev.buf)
-		if name ~= "" and vim.fn.isdirectory(name) == 1 then
-			require("nvim-tree.api").tree.change_root(name)
+		local dir = vim.api.nvim_buf_get_name(ev.buf)
+		if vim.fn.isdirectory(dir) == 1 then
+			vim.schedule(function()
+				vim.fn.CdModeCmd(dir)
+				require("nvim-tree.api").tree.change_root(dir)
+			end)
 		end
 	end,
 })
@@ -689,7 +688,8 @@ require("nvim-tree").setup({
 	renderer = {
 		group_empty = true,
 	},
-	--actions = { change_dir = { global = true }},
+	-- tcd mode: the BufEnter autocmd below does tcd + change_root; stop nvim-tree's window-local lcd
+	actions = { change_dir = { enable = false } },
 	filters = {
 		dotfiles = false,
 		git_ignored = false,

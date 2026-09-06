@@ -65,6 +65,7 @@ function! PlatformSettingsOnLoad() abort
 
     inoremap <D-v> <c-r><c-p>+
     cnoremap <D-v> <c-r>+
+    cnoremap <c-v> <c-r>+
     nnoremap <D-v> p
     vnoremap <D-v> "+p
     nnoremap <D-a> ggVG

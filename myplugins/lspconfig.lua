@@ -167,13 +167,14 @@ return {
 
             mason.setup()
             -- Prepend Mason bin dir so lspconfig can find manually-configured servers
-            vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin" .. ";" .. vim.env.PATH
+            local path_sep = vim.fn.has("win32") == 1 and ";" or ":"
+            vim.env.PATH = vim.fn.stdpath("data") .. "/mason/bin" .. path_sep .. vim.env.PATH
             mason_lspconfig.setup({
                 automatic_enable = {
                     exclude = {
                         "pylsp","jedi_language_server", "pyright",
                         "vale_ls", "rust_analyzer", "powershell_es",
-                        "yamlls", "proselint", "html", "jsonls",
+                        "yamlls", "html", "jsonls",
                     }
                 }
             })
@@ -223,7 +224,7 @@ return {
                 "Pipfile",
                 "pyrightconfig.json",
             }
-            require("lspconfig").proselint.setup()
+            -- proselint is not an LSP server; it runs as a none-ls diagnostics source
             require("lspconfig").pylsp.setup({
                 bundle_path = vim.fn.stdpath("data") .. "/mason/packages/python-lsp-server",
                 capabilities = capabilities,
@@ -297,7 +298,7 @@ return {
                     },
                 },
             })
-            require("lspconfig")["html_lsp"].setup({
+            require("lspconfig")["html"].setup({
                 capabilities = capabilities,
                 on_attach = on_attach,
                 flags = lsp_flags,
@@ -399,7 +400,6 @@ return {
                     null_ls.builtins.formatting.stylua,
                     null_ls.builtins.formatting.isort,
                     null_ls.builtins.formatting.black,
-                    null_ls.builtins.formatting.jq,
                     null_ls.builtins.formatting.prettier,
                     null_ls.builtins.diagnostics.proselint,
                     null_ls.builtins.formatting.biome,

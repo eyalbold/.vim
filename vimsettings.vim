@@ -213,7 +213,9 @@ function! OnLoad()
 
     "sleep 500ms
     "echom "onload"
-    cd ~/.vim
+    if argc()==0
+        cd ~/.vim
+    endif
     ":profile start /Users/eyalkarni/ab.log
     ":profile file /Users/eyalkarni/vimpy3/plugged/vim-ctrlspace/autoload/ctrlspace/workspaces.vim
     "call ToggleVerbose() 
@@ -310,7 +312,9 @@ set ut=3000
 silent! nunmap ,tt
 silent! nunmap ,t
 silent! nunmap @Þ
-silent! norm! `M
+if argc()==0
+	silent! norm! `M
+endif
 "call SetFont()
 endfunction
 

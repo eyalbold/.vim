@@ -38,9 +38,19 @@ nmap <leader>Gs <CMD>call StashAll()<CR>
 
 function! s:MmdReport(name, code, err) abort
     if a:code == 0
-        echohl MoreMsg | echom 'mmd compile OK: ' . a:name | echohl None
+        let l:msg = 'mmd compile OK: ' . a:name
+        if has('nvim')
+            call v:lua.vim.notify(l:msg, luaeval('vim.log.levels.INFO'))
+        else
+            echohl MoreMsg | echom l:msg | echohl None
+        endif
     else
-        echohl ErrorMsg | echom 'mmd compile FAIL(' . a:code . '): ' . a:name . (empty(a:err) ? '' : ' — ' . a:err) | echohl None
+        let l:msg = 'mmd compile FAIL(' . a:code . '): ' . a:name . (empty(a:err) ? '' : ' — ' . a:err)
+        if has('nvim')
+            call v:lua.vim.notify(l:msg, luaeval('vim.log.levels.ERROR'))
+        else
+            echohl ErrorMsg | echom l:msg | echohl None
+        endif
     endif
 endfunction
 

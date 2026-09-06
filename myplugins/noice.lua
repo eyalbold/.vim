@@ -111,6 +111,11 @@ require("noice").setup({
                         {find= '^%s*".*[\\/].*"%s*$' },
                         {find= 'Keyboard inte' },
                         {find= 'Unknown font' },
+                        -- claudecode.nvim spams these every ping tick for stale
+                        -- clients; each notification leaks 4 nvim-notify
+                        -- highlight groups -> E849 after a few thousand.
+                        { find = 'WebSocket server error'},
+                        { find = 'claudecode/server/client'},
                     },
                 },
                 opts = { skip = true },

@@ -684,6 +684,23 @@ function! CopyPath()
     let @+=expand('%:p')
 endfunction
 
+" open the current file with the OS default handler (start / open / xdg-open)
+function! StartMe(...)
+    let l:f = a:0 > 0 && !empty(a:1) ? expand(a:1) : expand('%:p')
+    if empty(l:f)
+        echo "no file"
+        return
+    endif
+    if has('mac')
+        call system('open ' . shellescape(l:f))
+    elseif has('unix')
+        call system('xdg-open ' . shellescape(l:f) . ' &')
+    else
+        silent exe '!start "" ' . shellescape(l:f)
+    endif
+endfunction
+command! -nargs=? -complete=file StartMe call StartMe(<q-args>)
+
 function! DisableKeys()
     noremap <Up> <Nop>
     noremap <Down> <Nop>

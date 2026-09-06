@@ -260,6 +260,8 @@ if has('nvim')
 endif
 let g:session_lock_enabled=0
 let MRU_File = $HOME . '/.vim/vim_mru'
+" nvim has no &File menu -> MRU_Refresh_Menu throws E329/E328
+let MRU_Add_Menu = 0
 
 set foldmethod=syntax
 set foldnestmax=99
@@ -581,7 +583,10 @@ let g:nvim_ipy_perform_mappings=0
 "
 "
 let g:VM_maps = {}
-let g:VM_maps["Run Normal"] = '\['
+" "Run Normal" is a buffer map, not a permanent one: setting it before the
+" plugin builds its permanent maps throws E716. Buffer maps are built lazily
+" per buffer at VM start, so adding it after VimEnter still takes effect.
+autocmd VimEnter * let g:VM_maps["Run Normal"] = '\['
 
 let g:VM_mouse_mappings=1
 
