@@ -76,6 +76,11 @@ require("noice").setup({
                 opts = { skip = true },
             },
             {
+                -- none-ls: fires on every diagnostics run while proselint isn't installed
+                filter = { event = "notify", find = "command proselint is not executable" },
+                opts = { skip = true },
+            },
+            {
                 filter = {
                     --event = "msg_show",
                     any = {

@@ -23,10 +23,15 @@ function! FzfDirChooseFile() abort
     \ })
 endfunction
 
+" snacks.nvim is disabled (myplugins/lazyplugs.lua), so use the built-in
+" terminal. 'splitright' is on, so vnew lands on the right.
 function! TermOV(use_file_dir) abort
     call CloseVspIfNeed()
     let l:cwd = a:use_file_dir ? expand('%:p:h') : expand('~')
-    call luaeval('Snacks.terminal.open(nil, { cwd = _A, win = { position = "right", width = 0.4 } })', l:cwd)
+    vnew
+    execute 'lcd' fnameescape(l:cwd)
+    execute 'vertical resize' float2nr(&columns * 0.4)
+    terminal
 endfunction
 
 function! TermO() abort
