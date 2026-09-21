@@ -2812,6 +2812,21 @@ endfunction
 nmap <leader>mo <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('LfFil')})<CR>
 nmap <leader>MO <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('DoMGf')})<CR>
 
+" :PrDiff [<pr>] — Diffview of a whole PR: everything since the commit it
+" branches off. No argument: the PR of the current branch.
+function! PrDiff(pr) abort
+    let l:cmd = 'cd ' . shellescape(GitTopLevel()) . ' && '
+        \ . shellescape(g:user_home . '/scripts/pr-base.sh') . ' --range'
+        \ . (empty(a:pr) ? '' : ' ' . shellescape(a:pr))
+    let l:out = trim(system(l:cmd))
+    if v:shell_error
+        echohl ErrorMsg | echo 'PrDiff: ' . l:out | echohl None
+        return
+    endif
+    exe 'DiffviewOpen ' . l:out
+endfunction
+command! -nargs=? PrDiff call PrDiff(<q-args>)
+
 command! -nargs=0 -bang AmendCur  :Gw | :Git commit --amend -v -q --no-edit | :exec ("<bang>"=="!" ? "Git push --force" : "echo")
 command! -nargs=0 -bang  AmendAll   :Git commit --amend -a -v -q --no-edit | :exec ("<bang>"=="!" ? "Git push --force" : "echo")
 

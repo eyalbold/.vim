@@ -800,3 +800,105 @@ function ClaudeVSplit()
   vim.fn.termopen("claude", { env = env })
   vim.cmd("startinsert")
 end
+
+-- :DiffGrep [query] — fuzzy-pick a changed line across every file in the current
+-- Diffview. Diffs the layout's own buffers, so nothing is re-read from git.
+local DG = {}
+
+function DG.file_entries(view)
+  local panel = view.panel
+  if panel and panel.ordered_file_list then
+    return panel:ordered_file_list()
+  end
+  local out = {}
+  for _, log_entry in ipairs(panel and panel.entries or {}) do
+    vim.list_extend(out, log_entry.files or {})
+  end
+  return out
+end
+
+function DG.collect(entry, items)
+  local old = entry.layout.a and entry.layout.a.file
+  local new = entry.layout.b and entry.layout.b.file
+  local function buflines(f)
+    if not (f and f:is_valid()) then return {} end
+    return vim.api.nvim_buf_get_lines(f.bufnr, 0, -1, false)
+  end
+  local la, lb = buflines(old), buflines(new)
+  local hunks = vim.diff(table.concat(la, "\n"), table.concat(lb, "\n"),
+    { result_type = "indices", algorithm = "histogram" }) or {}
+  for _, h in ipairs(hunks) do
+    for i = 0, h[2] - 1 do
+      items[#items + 1] = { entry = entry, bufnr = old.bufnr, lnum = h[1] + i,
+        sign = "-", text = la[h[1] + i] or "" }
+    end
+    for i = 0, h[4] - 1 do
+      items[#items + 1] = { entry = entry, bufnr = new.bufnr, lnum = h[3] + i,
+        sign = "+", text = lb[h[3] + i] or "" }
+    end
+  end
+end
+
+-- set_file is async, so poll for the window that ends up showing our buffer
+function DG.goto_item(view, item)
+  view:set_file(item.entry, true)
+  local tries = 0
+  local function try()
+    tries = tries + 1
+    if not vim.api.nvim_tabpage_is_valid(view.tabpage) then return end
+    vim.api.nvim_set_current_tabpage(view.tabpage)
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(view.tabpage)) do
+      if vim.api.nvim_win_get_buf(win) == item.bufnr then
+        vim.api.nvim_set_current_win(win)
+        pcall(vim.api.nvim_win_set_cursor, win, { item.lnum, 0 })
+        vim.cmd("normal! zz")
+        return
+      end
+    end
+    if tries < 20 then vim.defer_fn(try, 50) end
+  end
+  vim.defer_fn(try, 50)
+end
+
+function DiffGrep(query)
+  local ok, lib = pcall(require, "diffview.lib")
+  if not ok then
+    return vim.notify("DiffGrep: diffview is not loaded", vim.log.levels.WARN)
+  end
+  local view = lib.get_current_view()
+  if not view then
+    return vim.notify("DiffGrep: no Diffview in this tab", vim.log.levels.WARN)
+  end
+  local async = require("diffview.async")
+  async.void(function()
+    local items = {}
+    for _, entry in ipairs(DG.file_entries(view)) do
+      for _, f in ipairs(entry.layout:files()) do
+        async.pawait(f.create_buffer, f)
+      end
+      async.await(async.scheduler())
+      DG.collect(entry, items)
+    end
+    async.await(async.scheduler())
+    if #items == 0 then
+      return vim.notify("DiffGrep: no changed lines found", vim.log.levels.INFO)
+    end
+    local lines = {}
+    for i, it in ipairs(items) do
+      lines[i] = string.format("%d\t%s %s:%d: %s", i, it.sign, it.entry.path, it.lnum, it.text)
+    end
+    require("fzf-lua").fzf_exec(lines, {
+      prompt = "DiffGrep> ",
+      query = query ~= "" and query or nil,
+      fzf_opts = { ["--delimiter"] = "\t", ["--with-nth"] = "2.." },
+      actions = {
+        ["default"] = function(sel)
+          local it = sel and sel[1] and items[tonumber(sel[1]:match("^(%d+)\t"))]
+          if it then DG.goto_item(view, it) end
+        end,
+      },
+    })
+  end)()
+end
+
+vim.api.nvim_create_user_command("DiffGrep", function(o) DiffGrep(o.args) end, { nargs = "?" })
