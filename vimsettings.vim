@@ -165,7 +165,7 @@ function! SetFont()
     if exists('g:GuiLoaded')
         ":GuiFont! Fira\ Code:h12
         "set guifont=Fira\ Code\ aa:h12
-        set guifont=Hasklug\ Nerd\ Font\ Propo:h13
+        GuiFont! Hasklug Nerd Font Propo:h13
         ":GuiFont! FiraCode Nerd Font Propo:h13
         ":GuiFont! JetBrainsMono Nerd Font:h13
         ":GuiFont! CaskaydiaCove Nerd Font Propo:h13
@@ -224,6 +224,9 @@ function! OnLoad()
     "!cp /Users/eyalkarni/vimpy3/.git/cs_workspaces /tmp/onload 
     ". '~/vimpy3/'
 ":exe ":silent CtrlSpaceAddProjectRoot ". g:vimloc
+	" nvim-qt pushes its own saved font ~100ms after startup goes idle and would clobber
+	" ours; the outer timer fires at that idle point, the inner one waits it out.
+	call timer_start(0, {-> timer_start(300, {-> SetFont()})})
 	if !has('nvim')
 		return
 	endif 
@@ -317,7 +320,6 @@ silent! nunmap @Þ
 if argc()==0
 	silent! norm! `M
 endif
-call SetFont()
 endfunction
 
 function! LazyIt(a)
