@@ -32,10 +32,8 @@ function! TermOV(use_file_dir) abort
     execute 'lcd' fnameescape(l:cwd)
     execute 'vertical resize' float2nr(&columns * 0.4)
     terminal
-    " global tnoremaps (mappings.vim) swallow the zsh bindkeys (^E ClaudeZi, ^X, ^Y, ^Q)
-    for l:k in ['<C-e>', '<C-x>', '<C-y>', '<C-q>']
-        execute 'tnoremap <buffer>' l:k l:k
-    endfor
+    " let zsh's ^Q (zi) through instead of the global C-q close mapping
+    tnoremap <buffer> <C-q> <C-q>
 endfunction
 
 function! TermO() abort
@@ -43,7 +41,7 @@ function! TermO() abort
 endfunction
 
 nnoremap <leader>ot <CMD>tabnew <bar> call TermO()<CR>:startinsert<CR>
-nmap <leader>tt <CMD>call TermOV(0)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+nmap <leader>tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
 nmap <leader>Tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
 
 function! StashAll() abort
