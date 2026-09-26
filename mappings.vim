@@ -19,9 +19,9 @@ nnoremap <leader>xf <CMD>call DiagnosticsGitOnly()<CR><CMD>exe "Cfilter " . fil<
      endif
      
      let top = git_cmd[0]
-     exe 'cd ' . top
+     call ScopedCd(top)
      let git_files = systemlist("git ls-files --full-name 2>NUL")
-     exe 'cd ' . tmp
+     call ScopedCd(tmp)
      
      " Convert git files to full paths and create a dictionary for fast lookup
      let git_files_dict = {}
@@ -452,6 +452,10 @@ function! CdModeCmd(dir)
         exe 'cd ' . a:dir
     endif
     echo 'cd (' . g:cd_mode . '): ' . getcwd()
+endfunction
+" cd at whatever scope is already in effect (lcd/tcd/cd); plain :cd would clear a tab's tcd
+function! ScopedCd(dir) abort
+    exe (haslocaldir(0) ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd') fnameescape(a:dir)
 endfunction
 nmap _m <CMD>let g:cd_mode = (g:cd_mode == 'tab' ? 'global' : 'tab') \| echo 'cd mode: ' . g:cd_mode<CR>
 " _.: cd to parent directory
@@ -1301,6 +1305,9 @@ nmap <M-Bslash> <CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup b
 
 " m|: Leaderf buffer picker with preview enabled
 nnoremap <silent> m<bar> <CMD>LeaderfEnablePreview<CR><CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup  buffer --all<CR>
+" M| / M-|: same picker, prefiltered to Claude terminals (erase the query for all buffers)
+nnoremap <silent> M<bar> <CMD>LeaderfEnablePreview<CR><CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup  buffer --all --input claude<CR>
+nmap <M-bar> M<bar>
 "nmap <bar> <CMD>Telescope buffers<CR>
 "nnoremap <silent> <C-a>b <CMD>Leaderf buffers<CR>
 "
@@ -1379,10 +1386,10 @@ endfunction
 
 "does diff of all files (could be vs version) 
 function! GCWDComplete(A, L, P) abort
-return fugitive#Complete(a:A, a:L, a:P, {'dir': GitTopLevel()})
+return fugitive#Complete(a:A, a:L, a:P, {'git_dir': FugitiveExtractGitDir(getcwd())})
 endfunction
 
-command! -bang -nargs=? -range=-1 -complete=customlist,GCWDComplete GCWD exe fugitive#Command(<line1>, <count>, +"<range>", <bang>0, "<mods>", <q-args>,   { 'dir': GitTopLevel() })
+command! -bang -nargs=? -range=-1 -complete=customlist,GCWDComplete GCWD exe fugitive#Command(<line1>, <count>, +"<range>", <bang>0, "<mods>", <q-args>,   { 'git_dir': FugitiveExtractGitDir(getcwd()) })
 
 " mg: fugitive status for the current buffer's repository
 nmap mg <CMD>G<CR>
@@ -2450,7 +2457,7 @@ endfunction
      " Store original directory if needed
      let tmp = getcwd()
      if (a:curfile)
-         exe "cd " . expand("%:p:h")
+         call ScopedCd(expand("%:p:h"))
      endif
  
      " Get git root directory
@@ -2460,7 +2467,7 @@ endfunction
          return -1
      endif
      let top = git_cmd[0]
-     exe 'cd ' . top
+     call ScopedCd(top)
  
      " Get git files
      let files = systemlist("git ls-files --full-name 2>NUL")
@@ -2500,7 +2507,7 @@ endfunction
                  \ })
  
      " Restore original directory
-     exe 'cd ' . tmp
+     call ScopedCd(tmp)
  
      " Open quickfix window if we have entries
      if !empty(qf_list)
@@ -2515,11 +2522,11 @@ endfunction
      if (a:curfile)
  
      let tmp=getcwd()
-     :exe ":cd ". expand("%:p:h")
+     call ScopedCd(expand("%:p:h"))
  endif 
      let top = systemlist("git rev-parse --show-toplevel")[0]
      "echo top
-     :exe ':cd '. top
+     call ScopedCd(top)
      let a=systemlist("git ls-files --full-name  2>NUL" )
      :if len(a:regfilter)>0
      let a = filter(a,{idx,val -> (val =~ a:regfilter)})
@@ -2538,7 +2545,7 @@ endfunction
      execute printf('Leaderf rg --filelist %s %s"%s"', shellescape(g:config_temp_dir . '/filelist.txt'), pattern =~ '^\s*$' ? '' : '-e ', pattern)
      if (a:curfile)
  
-         :exe ':cd '.tmp
+         call ScopedCd(tmp)
      endif 
  
  endfunction
@@ -2546,11 +2553,11 @@ endfunction
      if (a:curfile)
  
      let tmp=getcwd()
-     :exe ":cd ". expand("%:p:h")
+     call ScopedCd(expand("%:p:h"))
  endif 
      let top = systemlist("git rev-parse --show-toplevel")[0]
      "echo top
-     :exe ':cd '. top
+     call ScopedCd(top)
      try
          echohl Question
          let pattern = input("Search pattern: ")
@@ -2561,7 +2568,7 @@ endfunction
      execute printf('Leaderf rg --filelist %s %s"%s"', shellescape(g:config_temp_dir . '/filelist.txt'), pattern =~ '^\s*$' ? '' : '-e ', pattern)
      if (a:curfile)
  
-         :exe ':cd '.tmp
+         call ScopedCd(tmp)
      endif 
  endfunction 
  function! ReplaceInFiles(path, pattern)
@@ -2596,11 +2603,11 @@ endfunction
      if (a:curfile)
  
      let tmp=getcwd()
-     :exe ":cd ". expand("%:p:h")
+     call ScopedCd(expand("%:p:h"))
  endif 
      let top = systemlist("git rev-parse --show-toplevel")[0]
      "echo top
-     :exe ':cd '. top
+     call ScopedCd(top)
      let a=systemlist("git ls-files --full-name 2>NUL" )
      :if len(a:regfilter)>0
      let a = filter(a,{idx,val -> (val =~ a:regfilter)})
@@ -2613,7 +2620,7 @@ endfunction
      execute printf('Leaderf rg --filelist %s %s"%s"', shellescape(g:config_temp_dir . '/filelist.txt'), pattern =~ '^\s*$' ? '' : '-e ', pattern)
      if (a:curfile)
  
-         :exe ':cd '.tmp
+         call ScopedCd(tmp)
      endif 
  
  endfunction

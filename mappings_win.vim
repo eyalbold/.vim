@@ -17,11 +17,10 @@ function! TermOV(use_file_dir) abort
     let g:neoterm_shell = executable('pwsh') ? 'pwsh' : 'powershell'
     set shell=cmd.exe
     set splitright
+    let l:cwd = a:use_file_dir ? expand('%:p:h') : getcwd()
     let l:terminal_id = g:neoterm.last_id + 1
     vertical Tnew "~/"
-    if a:use_file_dir
-        execute l:terminal_id . 'T cd ' . fnameescape(expand('%:p:h'))
-    endif
+    execute l:terminal_id . 'T cd ' . fnameescape(l:cwd)
     execute l:terminal_id . 'Tclear'
     let &shell = l:saved_shell
 endfunction
@@ -39,8 +38,8 @@ function! TermO() abort
 endfunction
 
 nnoremap <leader>ot <CMD>tabnew <bar> call TermO()<CR>:startinsert<CR>
-nmap <leader>tt <CMD>call TermOV(0)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
-nmap <leader>Tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+nmap <leader>tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+nmap <leader>Tt <CMD>call TermOV(0)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
 nmap <leader>gt <CMD>call TermLOV()<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
 
 function! StashAll() abort
