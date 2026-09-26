@@ -27,7 +27,7 @@ endfunction
 " terminal. 'splitright' is on, so vnew lands on the right.
 function! TermOV(use_file_dir) abort
     call CloseVspIfNeed()
-    let l:cwd = a:use_file_dir ? expand('%:p:h') : expand('~')
+    let l:cwd = a:use_file_dir ? expand('%:p:h') : getcwd()
     vnew
     execute 'lcd' fnameescape(l:cwd)
     execute 'vertical resize' float2nr(&columns * 0.4)
@@ -42,7 +42,7 @@ endfunction
 
 nnoremap <leader>ot <CMD>tabnew <bar> call TermO()<CR>:startinsert<CR>
 nmap <leader>tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
-nmap <leader>Tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+nmap <leader>Tt <CMD>call TermOV(0)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
 
 function! StashAll() abort
     let l:stash = input('Enter name: ')
