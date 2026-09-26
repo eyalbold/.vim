@@ -1055,10 +1055,10 @@ nnoremap MH <CMD>Help
 nnoremap Mh <CMD>help
 " mH: fuzzy search vim help topics (Leaderf)
 nnoremap mH <CMD>LeaderfHelp<CR>
-" \mm: MRU file picker (Leaderf, ordered)
-noremap <leader>mm <CMD>LeaderfMru<CR>
-" mm: smart MRU with frecency scoring (Telescope)
-noremap mm <CMD>Telescope frecency<CR>
+" \mm: smart MRU with frecency scoring (Telescope)
+noremap <leader>mm <CMD>Telescope frecency<CR>
+" mm: MRU file picker (Leaderf, ordered)
+noremap mm <CMD>LeaderfMru<CR>
 "this is by order and not fuzzy
 " mM: simple chronological MRU list
 noremap mM <CMD>Mru<CR>
@@ -2812,20 +2812,34 @@ endfunction
 nmap <leader>mo <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('LfFil')})<CR>
 nmap <leader>MO <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('DoMGf')})<CR>
 
-" :PrDiff [<pr>] — Diffview of a whole PR: everything since the commit it
-" branches off. No argument: the PR of the current branch.
-function! PrDiff(pr) abort
+" Ask pr-base.sh for a PR's base; returns '' and echoes on failure.
+function! PrBaseRev(pr, flags) abort
     let l:cmd = 'cd ' . shellescape(GitTopLevel()) . ' && '
-        \ . shellescape(g:user_home . '/scripts/pr-base.sh') . ' --range'
+        \ . shellescape(g:user_home . '/scripts/pr-base.sh') . a:flags
         \ . (empty(a:pr) ? '' : ' ' . shellescape(a:pr))
     let l:out = trim(system(l:cmd))
     if v:shell_error
-        echohl ErrorMsg | echo 'PrDiff: ' . l:out | echohl None
-        return
+        echohl ErrorMsg | echo 'PrBase: ' . l:out | echohl None
+        return ''
     endif
-    exe 'DiffviewOpen ' . l:out
+    return l:out
+endfunction
+
+" :PrDiff [<pr>] — Diffview of a whole PR: everything since the commit it
+" branches off. No argument: the PR of the current branch.
+function! PrDiff(pr) abort
+    let l:rev = PrBaseRev(a:pr, ' --range')
+    if !empty(l:rev) | exe 'DiffviewOpen ' . l:rev | endif
 endfunction
 command! -nargs=? PrDiff call PrDiff(<q-args>)
+
+" :PrDiffCur [<pr>] — same base, but the right side is the working tree
+" (diffview's LOCAL): the PR's changes plus anything uncommitted on top.
+function! PrDiffCur(pr) abort
+    let l:rev = PrBaseRev(a:pr, '')
+    if !empty(l:rev) | exe 'DiffviewOpen ' . l:rev | endif
+endfunction
+command! -nargs=? PrDiffCur call PrDiffCur(<q-args>)
 
 command! -nargs=0 -bang AmendCur  :Gw | :Git commit --amend -v -q --no-edit | :exec ("<bang>"=="!" ? "Git push --force" : "echo")
 command! -nargs=0 -bang  AmendAll   :Git commit --amend -a -v -q --no-edit | :exec ("<bang>"=="!" ? "Git push --force" : "echo")
