@@ -32,6 +32,10 @@ function! TermOV(use_file_dir) abort
     execute 'lcd' fnameescape(l:cwd)
     execute 'vertical resize' float2nr(&columns * 0.4)
     terminal
+    " global tnoremaps (mappings.vim) swallow the zsh bindkeys (^E ClaudeZi, ^X, ^Y, ^Q)
+    for l:k in ['<C-e>', '<C-x>', '<C-y>', '<C-q>']
+        execute 'tnoremap <buffer>' l:k l:k
+    endfor
 endfunction
 
 function! TermO() abort

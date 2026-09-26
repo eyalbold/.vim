@@ -121,6 +121,7 @@ require("noice").setup({
                         -- highlight groups -> E849 after a few thousand.
                         { find = 'WebSocket server error'},
                         { find = 'claudecode/server/client'},
+                        { find = 'nvim%-navbuddy'},
                     },
                 },
                 opts = { skip = true },
