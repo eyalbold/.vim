@@ -26,7 +26,15 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end,
 })
 
+local attached = {}
 local on_attach = function(client, bufnr)
+    -- runs twice for explicitly-configured servers: once from lspconfig,
+    -- once from the LspAttach autocmd below
+    local key = bufnr .. ":" .. client.id
+    if attached[key] then
+        return
+    end
+    attached[key] = true
     function BufIsBig(bufnr)
         local max_filesize = 100 * 1024 -- 100 KB
         local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(bufnr))
@@ -123,6 +131,17 @@ local on_attach = function(client, bufnr)
     buf_set_keymap("v", "_a", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
     vim.keymap.set("n", "_A", require("actions-preview").code_actions, opts)
 end
+
+-- Servers auto-enabled by mason-lspconfig (anything not in the automatic_enable
+-- exclude list) are never passed on_attach, so apply it to every client here.
+vim.api.nvim_create_autocmd("LspAttach", {
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client then
+            on_attach(client, args.buf)
+        end
+    end,
+})
 
 return {
     {

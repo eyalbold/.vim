@@ -902,3 +902,57 @@ function DiffGrep(query)
 end
 
 vim.api.nvim_create_user_command("DiffGrep", function(o) DiffGrep(o.args) end, { nargs = "?" })
+
+-- LSP in Diffview's revision buffers. The work-tree side is a real file and gets a
+-- client on its own; the git-revision side is buftype=nowrite, which vim.lsp's
+-- auto-attach skips outright. Reuse whatever client already serves that path --
+-- servers answer over the diffview:// URI, so hover/definition work on old code.
+local function DiffviewAttachLsp(bufnr)
+  local ok, lib = pcall(require, "diffview.lib")
+  if not ok then return end
+  local view = lib.get_current_view()
+  if not view then return end
+
+  local path
+  for _, entry in ipairs(DG.file_entries(view)) do
+    for _, f in ipairs(entry.layout:files()) do
+      if f.bufnr == bufnr then path = f.absolute_path end
+    end
+  end
+  if not path then return end
+
+  local ft = vim.bo[bufnr].filetype
+  for _, client in ipairs(vim.lsp.get_clients()) do
+    local fts = client.config.filetypes
+    if fts and vim.tbl_contains(fts, ft)
+      and client.root_dir and vim.startswith(path, client.root_dir)
+    then
+      vim.lsp.buf_attach_client(bufnr, client.id)
+    end
+  end
+end
+
+-- Sweep the tab rather than attach one buffer: the work-tree side's client often
+-- starts *after* the revision window is already up, so LspAttach is the second
+-- chance for a revision buffer that found nothing running the first time.
+local function DiffviewSweepLsp()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    local b = vim.api.nvim_win_get_buf(win)
+    if vim.bo[b].buftype == "nowrite"
+      and vim.api.nvim_buf_get_name(b):match("^diffview://")
+    then
+      DiffviewAttachLsp(b)
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd({ "BufWinEnter", "LspAttach" }, {
+  callback = function(args)
+    if args.event == "BufWinEnter"
+      and not vim.api.nvim_buf_get_name(args.buf):match("^diffview://")
+    then
+      return
+    end
+    vim.schedule(DiffviewSweepLsp)
+  end,
+})
