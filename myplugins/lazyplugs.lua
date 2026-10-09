@@ -21,6 +21,7 @@ return {
         -- optional for icon support
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
+            local actions = require("fzf-lua").actions
             -- calling `setup` is optional for customization
             require("fzf-lua").setup({
                 winopts = {
@@ -33,9 +34,27 @@ return {
                         horizontal = "right:55%",
                     },
                 },
+                keymap = {
+                    fzf = {
+                        -- free alt-g from its default "first" binding so files action can use it
+                        ["alt-g"] = false,
+                    },
+                },
                 files = {
                     -- show hidden files, exclude diff/patch files
                     cmd = "rg --files --hidden --glob '!*.diff' --glob '!*.patch'",
+                    actions = {
+                        -- macOS terminals eat Option/Alt, so move the alt-* file actions to ctrl-*
+                        ["alt-i"] = false,
+                        ["alt-h"] = false,
+                        ["alt-f"] = false,
+                        ["ctrl-g"] = { fn = actions.toggle_ignore, reuse = true, header = false }, -- toggle gitignore
+                        ["ctrl-d"] = { fn = actions.toggle_hidden, reuse = true, header = false }, -- toggle hidden/dotfiles
+                        ["ctrl-l"] = { fn = actions.toggle_follow, reuse = true, header = false }, -- toggle follow symlinks
+                        -- ctrl-q left alone (terminal needs it); quickfix stays on alt-q
+                        ["alt-Q"] = false,
+                        ["ctrl-y"] = actions.file_sel_to_ll, -- send selection to loclist
+                    },
                 },
             })
         end,
@@ -62,17 +81,21 @@ return {
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
             local function hello()
-                return vim.uv.cwd()
+                local scope = vim.fn.haslocaldir(0) == 1 and "[win] "
+                    or vim.fn.haslocaldir(-1, 0) == 1 and "[tab] "
+                    or ""
+                return scope .. vim.fn.getcwd()
             end
 
             require("lualine").setup({
                 options = { path = 1 },
                 sections = {
                     lualine_c = { "filename", [[ | ]], hello },
-                    lualine_d = {
+                    lualine_x = {
                         function()
                             return vim.b.autosave and "Autosave On" or "Autosave Off"
                         end,
+                        "encoding", "fileformat", "filetype",
                     },
                 },
             })
@@ -166,6 +189,7 @@ return {
     { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
     { "<leader>aS", "<cmd>call CloseClaudeBufferInWindow()<cr><cmd>ClaudeCodeStart!<cr>", desc = "Claude Force Start" },
     { "<leader>av", "<cmd>lua ClaudeVSplit()<cr>", desc = "Claude in vsplit" },
+    { "<leader>pc", "<cmd>lua ClaudeInVimDir()<cr>", desc = "Claude in ~/.vim (same window)" },
     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
     { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
     { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },

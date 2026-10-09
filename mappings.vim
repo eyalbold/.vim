@@ -1618,16 +1618,20 @@ function! OnRight()
     let k=getwininfo(win_getid())[0]
     return (k['wincol']!=1)
 endfunction 
+" Jump to the rightmost window of the current tab (a: kept for callers).
 function! GoRight(a)
+    let l:id = -1
+    let l:col = 1
     for k in getwininfo()
-        if k['winrow']<=2 && k['wincol']>1
-            "look no further
-            let id=k['winid']
-            call win_gotoid(id)
-            return
+        if k['tabnr']==tabpagenr() && k['wincol']>l:col
+            let l:col = k['wincol']
+            let l:id = k['winid']
         endif
     endfor
-endfunction 
+    if l:id != -1
+        call win_gotoid(l:id)
+    endif
+endfunction
 function! SwitchKeepRight()
 
     if OnRight() 
@@ -3130,38 +3134,38 @@ nmap <leader>AF :Af =expand('%:p:h')<CR>
  function! FzfDirSelect()
      let l:zoxide = systemlist('zoxide query --list 2>/dev/null')
      let l:all = uniq(sort(map(copy(g:dirs), 'tolower(v:val)') + l:zoxide))
-     call fzf#run({
+     call fzf#run(fzf#wrap({
          \ 'source': l:all,
          \ 'sink': function('CdDirPlug'),
          \ 'options': '--preview "ls {} | head -50"'
-     \ })
+     \ }))
  endfunction
  function! FzfDirSelectTcd()
-     call fzf#run({
+     call fzf#run(fzf#wrap({
          \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
          \ 'sink': function('TcdDirPlug'),
          \ 'options': '--preview "ls {} | head -50"'
-     \ })
+     \ }))
  endfunction
  
  function! CdWorktree(item)
     call CdDirPlug(split(a:item)[0])
 endfunction
 function! FzfWorktreeSelect()
-    call fzf#run({
+    call fzf#run(fzf#wrap({
         \ 'source': 'git worktree list',
         \ 'sink': function('CdWorktree'),
         \ 'options': '--preview "ls {1} | head -50"'
-    \ })
+    \ }))
 endfunction
 command! Worktrees call FzfWorktreeSelect()
 
 function! FzfDirChooseFile()
-     call fzf#run({
+     call fzf#run(fzf#wrap({
          \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
          \ 'sink': function('ChooseFile'),
          \ 'options': '-i --preview "ls {} | head -50"'
-     \ })
+     \ }))
  endfunction
 
  "look for files 
@@ -3182,13 +3186,15 @@ function! FzfDirChooseFile()
  nmap <leader>AD :Ad <C-R>=expand('%:p:h')<CR><CR>
  nmap <leader>ad :Ad <C-R>=getcwd()<CR><CR>
  command! -nargs=1 -complete=dir Ad call ChooseDir(<q-args>)
- function! ChooseDir(item)
+ " optional 2nd arg: command listing files, whose dirs become the candidates
+ function! ChooseDir(item, ...)
      exe "cd ".a:item
+     let g:choose_dir_cmd = a:0 ? a:1 : 'rg --files'
  lua << EOF
-     -- dirs derived from rg --files (respects .gitignore, no fd needed)
+     -- dirs derived from the file listing (rg --files respects .gitignore, no fd needed)
      require('fzf-lua').fzf_exec(function(fzf_cb)
          local seen = {}
-         for _, f in ipairs(vim.fn.systemlist('rg --files')) do
+         for _, f in ipairs(vim.fn.systemlist(vim.g.choose_dir_cmd)) do
              local d = vim.fs.dirname((f:gsub('\\', '/')))
              while d and d ~= '.' and d ~= '/' and not seen[d] do
                  seen[d] = true
@@ -3211,6 +3217,23 @@ function! FzfDirChooseFile()
      })
 EOF
  endfunction
+ function! FzfDirThenSubdir()
+     call fzf#run({
+         \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
+         \ 'sink': function('ChooseDir'),
+         \ 'options': '-i --preview "ls {} | head -50"'
+     \ })
+ endfunction
+ " C-a S: recent dir, then one of its subfolders → cd + nvim-tree
+ nnoremap <silent> <C-a>S <CMD>call FzfDirThenSubdir()<CR>
+ " C-a e: subfolder of cwd → cd + nvim-tree
+ nnoremap <silent> <C-a>e <CMD>call ChooseDir(getcwd())<CR>
+ " C-a E: git-tracked subfolder of the whole repo → cd + nvim-tree
+ nnoremap <silent> <C-a>E <CMD>call ChooseDir(systemlist('git rev-parse --show-toplevel')[0], 'git ls-files')<CR>
+ " \cg: cd cwd to the git root
+ nnoremap <leader>cg <CMD>exe 'cd ' . fnameescape(systemlist('git rev-parse --show-toplevel')[0])<CR><CMD>pwd<CR>
+ " \sm: re-source this mappings file
+ nnoremap <leader>sm <CMD>exe 'source ' . fnameescape(expand('~/.vim/mappings.vim'))<CR><CMD>echo 'mappings.vim sourced'<CR>
  " make <leader>vc do VimtexCompile
  nmap <leader>vc <CMD>VimtexStop<CR><CMD>VimtexCompile<CR>
  

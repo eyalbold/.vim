@@ -691,6 +691,15 @@ function! StartMe(...)
         echo "no file"
         return
     endif
+    " .mmd has no viewer - open what CompileMmd() produced
+    if l:f =~? '\.mmd$'
+        let l:pdf = fnamemodify(l:f, ':r') . '.pdf'
+        if !filereadable(l:pdf)
+            echo "not compiled yet: " . l:pdf
+            return
+        endif
+        let l:f = l:pdf
+    endif
     if has('mac')
         call system('open ' . shellescape(l:f))
     elseif has('unix')

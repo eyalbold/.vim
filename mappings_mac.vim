@@ -16,11 +16,11 @@ function! TcdChooseFile(item) abort
 endfunction
 
 function! FzfDirChooseFile() abort
-    call fzf#run({
+    call fzf#run(fzf#wrap({
         \ 'source': uniq(sort(map(copy(g:dirs), 'tolower(v:val)'))),
         \ 'sink': function('TcdChooseFile'),
         \ 'options': '-i --preview "ls {} | head -50"'
-    \ })
+    \ }))
 endfunction
 
 " snacks.nvim is disabled (myplugins/lazyplugs.lua), so use the built-in
@@ -41,8 +41,8 @@ function! TermO() abort
 endfunction
 
 nnoremap <leader>ot <CMD>tabnew <bar> call TermO()<CR>:startinsert<CR>
-nmap <leader>tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
-nmap <leader>Tt <CMD>call TermOV(0)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+nmap <leader>tt <CMD>call TermOV(1)<CR>:startinsert<CR>
+nmap <leader>Tt <CMD>call TermOV(0)<CR>:startinsert<CR>
 
 function! StashAll() abort
     let l:stash = input('Enter name: ')

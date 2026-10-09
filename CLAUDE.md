@@ -83,7 +83,11 @@ The **primary** plugin list (work-specific variant but we are in work settings).
 
 `newplug_.vim` is the original which you shouldn't edit . 
 ### `mappings.vim` — keymaps and custom functions
-Contains all keybindings and non-trivial vimscript functions:
+Most (not all) keybindings plus non-trivial vimscript functions. **Mappings also live in Lua** — when hunting a mapping, grep these too:
+- `myinit.lua` — `vim.keymap.set` for global maps (`TN`, `mt`, `_q`/`_Q` diagnostics, `<leader>h*`) and the whole nvim-tree keymap table
+- `myplugins/lspconfig.lua` — buffer-local LSP maps set in `on_attach` (`gd`, `gD`, `gr`, `gR`, `gi`, `<BS>` hover, `_k`, `_s` workspace symbols, `_A`, `_l`, `_w*`, `mD`)
+
+In `mappings.vim` itself:
 - `DiagnosticsGitOnly()` — filters LSP diagnostics to only files tracked by git
 - `AlignWithTopLine()` / `ConditionalAlign()` / `FormatCurrentBlock()` — Python-aware indentation alignment (uses autopep8)
 - `<leader>xf` / `<leader>XF` — show filtered LSP diagnostics (quickfix/loclist)

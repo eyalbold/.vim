@@ -801,6 +801,21 @@ function ClaudeVSplit()
   vim.cmd("startinsert")
 end
 
+-- Open Claude in the CURRENT window, rooted at ~/.vim (\pc).
+function ClaudeInVimDir()
+  vim.fn.CloseClaudeBufferInWindow()
+  local cc = require("claudecode")
+  if not cc.state.server then
+    cc.start(false)
+  end
+  local port = require("claudecode.server.init").state.port
+  local env = { ENABLE_IDE_INTEGRATION = "true", FORCE_CODE_TERMINAL = "true" }
+  if port then env.CLAUDE_CODE_SSE_PORT = tostring(port) end
+  vim.cmd("enew")
+  vim.fn.termopen("claude", { env = env, cwd = vim.fn.expand("~/.vim") })
+  vim.cmd("startinsert")
+end
+
 -- :DiffGrep [query] — fuzzy-pick a changed line across every file in the current
 -- Diffview. Diffs the layout's own buffers, so nothing is re-read from git.
 local DG = {}

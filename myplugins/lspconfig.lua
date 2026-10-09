@@ -89,7 +89,9 @@ local on_attach = function(client, bufnr)
     vim.keymap.set("n", "gR", vim.lsp.buf.rename, bufopts)
     vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
     local function symb(...)
-        require("telescope.builtin").lsp_workspace_symbols({
+        -- gopls returns nothing for an empty query, so go needs the dynamic picker
+        local picker = vim.bo.filetype == "go" and "lsp_dynamic_workspace_symbols" or "lsp_workspace_symbols"
+        require("telescope.builtin")[picker]({
             layout_config = {
                 horizontal = {
                     width = function(_, max_columns)
