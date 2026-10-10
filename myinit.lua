@@ -787,6 +787,46 @@ function FocusClaudeCwd()
   end
 end
 
+-- fzf picker over Claude terminal buffers; jumps to the window if already visible.
+function PickClaudeBuffer()
+  local fzf = require("fzf-lua")
+  local nbsp = require("fzf-lua.utils").nbsp
+  local entries, bufs = {}, {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.bo[buf].buftype == "terminal" then
+      local name = vim.api.nvim_buf_get_name(buf)
+      if name:match("claude") then
+        local dir = name:match("^term://(.-)//") or name
+        -- "[bufnr]<nbsp>text" is what fzf-lua's builtin previewer expects
+        local entry = string.format("[%d]%s%s", buf, nbsp, vim.fn.fnamemodify(dir, ":~"))
+        table.insert(entries, entry)
+        bufs[entry] = buf
+      end
+    end
+  end
+  if #entries == 0 then
+    vim.notify("No claude terminal buffers", vim.log.levels.WARN)
+    return
+  end
+  fzf.fzf_exec(entries, {
+    prompt = "Claude> ",
+    previewer = "builtin",
+    actions = {
+      ["default"] = function(selected)
+        local buf = bufs[selected[1]]
+        if not buf then return end
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+          if vim.api.nvim_win_get_buf(win) == buf then
+            vim.api.nvim_set_current_win(win)
+            return
+          end
+        end
+        vim.api.nvim_set_current_buf(buf)
+      end,
+    },
+  })
+end
+
 -- Open Claude in a full-height botright vsplit with MCP integration.
 function ClaudeVSplit()
   local cc = require("claudecode")
@@ -813,6 +853,21 @@ function ClaudeInVimDir()
   if port then env.CLAUDE_CODE_SSE_PORT = tostring(port) end
   vim.cmd("enew")
   vim.fn.termopen("claude", { env = env, cwd = vim.fn.expand("~/.vim") })
+  vim.cmd("startinsert")
+end
+
+-- Run the shell's `ci` (claude-history -g picker) in a botright vsplit (\ah).
+-- Same env as ClaudeVSplit so a session resumed from it gets IDE integration.
+function ClaudeHistory()
+  local cc = require("claudecode")
+  if not cc.state.server then
+    cc.start(false)
+  end
+  local port = require("claudecode.server.init").state.port
+  local env = { ENABLE_IDE_INTEGRATION = "true", FORCE_CODE_TERMINAL = "true" }
+  if port then env.CLAUDE_CODE_SSE_PORT = tostring(port) end
+  vim.cmd("botright vnew")
+  vim.fn.termopen({ "zsh", "-ic", "ci" }, { env = env })
   vim.cmd("startinsert")
 end
 

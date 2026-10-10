@@ -1305,8 +1305,8 @@ nmap <M-Bslash> <CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup b
 
 " m|: Leaderf buffer picker with preview enabled
 nnoremap <silent> m<bar> <CMD>LeaderfEnablePreview<CR><CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup  buffer --all<CR>
-" M| / M-|: same picker, prefiltered to Claude terminals (erase the query for all buffers)
-nnoremap <silent> M<bar> <CMD>LeaderfEnablePreview<CR><CMD>let g:Lf_JumpToExistingWindow = 0<CR><CMD>Leaderf --popup  buffer --all --input claude<CR>
+" M| / M-|: fzf picker of Claude terminals only; jumps to existing window
+nnoremap <silent> M<bar> <CMD>lua PickClaudeBuffer()<CR>
 nmap <M-bar> M<bar>
 "nmap <bar> <CMD>Telescope buffers<CR>
 "nnoremap <silent> <C-a>b <CMD>Leaderf buffers<CR>
@@ -3030,6 +3030,8 @@ endfunction
 nmap <leader>vn <cmd>call CloseVspIfNeed()<CR><CMD>:vnew<CR>
 nmap <c-,> mc<leader>ac
 nmap <leader>aF mc<CMD>ClaudeCodeStop<CR>ClaudeCodeOpen<CR>
+" \ah: claude history picker (shell `ci` = claude-history -g) in a vsplit
+nmap <leader>ah <CMD>lua ClaudeHistory()<CR>
 nmap <leader>mM <CMD>Minuet virtualtext toggle<CR>
 "nmap <leader>hs <CMD>GitGutterEnable<CR><Plug>(GitGutterStageHunk)<CMD>GitGutterDisable<CR>
 "p>
@@ -3232,8 +3234,8 @@ EOF
  nnoremap <silent> <C-a>E <CMD>call ChooseDir(systemlist('git rev-parse --show-toplevel')[0], 'git ls-files')<CR>
  " \cg: cd cwd to the git root
  nnoremap <leader>cg <CMD>exe 'cd ' . fnameescape(systemlist('git rev-parse --show-toplevel')[0])<CR><CMD>pwd<CR>
- " \sm: re-source this mappings file
- nnoremap <leader>sm <CMD>exe 'source ' . fnameescape(expand('~/.vim/mappings.vim'))<CR><CMD>echo 'mappings.vim sourced'<CR>
+ " \sm: re-source hacks.vim, myinit.lua and this mappings file
+ nnoremap <leader>sm <CMD>source ~/.vim/hacks.vim<CR><CMD>luafile ~/.vim/myinit.lua<CR><CMD>source ~/.vim/mappings.vim<CR><CMD>echo 'hacks.vim, myinit.lua, mappings.vim sourced'<CR>
  " make <leader>vc do VimtexCompile
  nmap <leader>vc <CMD>VimtexStop<CR><CMD>VimtexCompile<CR>
  
