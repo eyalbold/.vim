@@ -316,7 +316,9 @@ telescope.setup({
 -- nnoremap TN <nowait> :tabnew<CR> add this as lua 
 vim.keymap.set("n", "TN", ":tabnew<CR>", {  silent = true })
 
+-- <esc>: plain esc (identity map so plugins can't remap it)
 vim.keymap.set("n", "<esc>", "<esc>")
+-- i: <esc>: plain esc (identity map so plugins can't remap it)
 vim.keymap.set("i", "<esc>", "<esc>")
 --lua require'telescope.builtin'.lsp_workspace_symbols({["layout_config.preview_width"]    = 0.8})
 --lua telescope.builtin.lsp_workspace_symbols({layout_config.width   = 0.8})
@@ -338,9 +340,11 @@ end
 
 --require('fzf-lua').setup{}
 local opts = { noremap = true, silent = true }
+-- _Q: show diagnostics for the current line in a float
 vim.keymap.set("n", "_Q", vim.diagnostic.open_float, opts)
 --vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 --vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+-- _q: put buffer diagnostics into the location list
 vim.keymap.set("n", "_q", vim.diagnostic.setloclist, opts)
 local function opencwd()
 	local api = require("nvim-tree.api")
@@ -348,6 +352,7 @@ local function opencwd()
 	api.tree.open({ path = vim.fn.getcwd() })
 	api.tree.change_root(pathb) --in case
 end
+-- mt: open nvim-tree rooted at vim's cwd
 vim.keymap.set("n", "mt", opencwd, opts)
 -- CMP configuration has been moved to myplugins/cmp.lua (loaded via Lazy.nvim)
 
@@ -500,10 +505,12 @@ local function show_modifier_mappings(trigger_key, pattern, display_name)
   wk.show(vim.api.nvim_replace_termcodes(trigger_key, true, true, true), { mode = "n" })
 end
 
+-- \hm: which-key popup listing all Alt mappings
 vim.keymap.set("n", "<leader>hm", function()
   show_modifier_mappings("<F20>", "^<M%-(.-)>$", "Alt")
 end, { desc = "Show Alt keymaps" })
 
+-- \hc: which-key popup listing all Ctrl mappings
 vim.keymap.set("n", "<leader>hc", function()
   show_modifier_mappings("<F21>", "^<C%-(.-)>$", "Ctrl")
 end, { desc = "Show Ctrl keymaps" })

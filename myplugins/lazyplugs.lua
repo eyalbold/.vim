@@ -308,6 +308,9 @@ opts = {
       extensions = {
         frecency = {
           db_safe_mode = false,
+          show_scores = false,
+          show_filter_column = false,
+          layout_config = { width = 0.95, height = 0.9, preview_width = 0.5 },
         },
       },
     }

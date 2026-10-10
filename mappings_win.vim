@@ -1,5 +1,6 @@
 " Windows-only mappings and helpers.
 nnoremap mf <CMD>execute '!start "" ' . shellescape(expand('%:p:h'))<CR>
+" \mF: open vim's cwd in Explorer
 nnoremap <leader>mF <CMD>execute '!start "" ' . shellescape(getcwd())<CR>
 
 function! TermLOV() abort
@@ -37,16 +38,22 @@ function! TermO() abort
     execute l:terminal_id . 'Tclear'
 endfunction
 
+" \ot: new tab with a neoterm bash terminal (sources bashrc/profile, emacs keys)
 nnoremap <leader>ot <CMD>tabnew <bar> call TermO()<CR>:startinsert<CR>
+" \tt: PowerShell neoterm in a right vsplit, cwd = current file's dir, focus it
 nmap <leader>tt <CMD>call TermOV(1)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+" \Tt: PowerShell neoterm in a right vsplit, cwd = vim's cwd, focus it
 nmap <leader>Tt <CMD>call TermOV(0)<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
+" \gt: WSL neoterm in a right vsplit (home dir), focus it
 nmap <leader>gt <CMD>call TermLOV()<CR><CMD>call GoRight(0)<CR>:startinsert<CR>
 
 function! StashAll() abort
     let l:stash = input('Enter name: ')
     execute '!pwsh -command "StashAll ' . l:stash . '"'
 endfunction
+" \Gs: git stash via pwsh StashAll with a prompted name
 nmap <leader>Gs <CMD>call StashAll()<CR>
+" \ps: toggle vim's &shell between cmd and PowerShell
 nmap <leader>ps <CMD>call TogglePS()<CR>
 
 function! DoRf() abort
@@ -55,6 +62,7 @@ function! DoRf() abort
     call feedkeys("\<C-e>")
     call feedkeys("\<C-v>\<CR>")
 endfunction
+" \rf (ps1): copy file path, open a \tt terminal and paste + run the path there
 autocmd FileType ps1 nmap <buffer> <leader>rf <CMD>call DoRf()<CR>
 
 silent! source C:/temp/quicksel.vim

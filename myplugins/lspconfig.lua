@@ -54,6 +54,7 @@ local on_attach = function(client, bufnr)
     navbuddy.attach(client, bufnr)
 
     vim.diagnostic.config({ virtual_text = { severity = vim.diagnostic.severity.ERROR }, virtual_lines = true })
+    -- _l: toggle diagnostics between lsp_lines (virtual_lines) and plain virtual text
     vim.keymap.set("", "_l", function()
         if vim.diagnostic.config().virtual_text then
             -- vim.diagnostic.config({ virtual_text = false, virtual_lines = { only_current_line = true } })
@@ -69,24 +70,37 @@ local on_attach = function(client, bufnr)
     ---- Mappings.
     ---- See `:help vim.lsp.*` for documentation on any of the below functions
     local bufopts = { noremap = true, silent = true, buffer = bufnr }
+    -- gD: go to declaration
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, bufopts)
+    -- gd: go to definition
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, bufopts)
+    -- <BS>: LSP hover docs for the symbol under cursor
     vim.keymap.set("n", "<BS>", vim.lsp.buf.hover, bufopts)
+    -- gi: go to implementation
     vim.keymap.set("n", "gi", vim.lsp.buf.implementation, bufopts)
+    -- _k: show signature help
     vim.keymap.set("n", "_k", vim.lsp.buf.signature_help, bufopts)
+    -- _wa: add an LSP workspace folder
     vim.keymap.set("n", "_wa", vim.lsp.buf.add_workspace_folder, bufopts)
+    -- _ws: prompt for a dir and make it the only LSP workspace folder
     vim.keymap.set("n", "_ws", function()
         set_workspace_dir(vim.fn.input("Directory: ", vim.fn.getcwd()))
     end)
+    -- _wr: remove an LSP workspace folder
     vim.keymap.set("n", "_wr", vim.lsp.buf.remove_workspace_folder, bufopts)
+    -- _wl: print the LSP workspace folders
     vim.keymap.set("n", "_wl", function()
         print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, bufopts)
+    -- mD: go to type definition
     vim.keymap.set("n", "mD", vim.lsp.buf.type_definition, bufopts)
+    -- _D: toggle diagnostics on/off
     vim.keymap.set("n", "_D", function()
         vim.diagnostic.enable(not vim.diagnostic.is_enabled())
     end, bufopts)
+    -- gR: LSP rename symbol under cursor
     vim.keymap.set("n", "gR", vim.lsp.buf.rename, bufopts)
+    -- gr: list references in quickfix
     vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
     local function symb(...)
         -- gopls returns nothing for an empty query, so go needs the dynamic picker
@@ -112,6 +126,7 @@ local on_attach = function(client, bufnr)
             path_display = { "tail" },
         })
     end
+    -- _s: Telescope workspace symbols, wide layout (dynamic picker for go)
     vim.keymap.set("n", "_s", symb, bufopts)
     --vim.keymap.set("v", "<c-y>", live_grep_args_shortcuts.grep_visual_selection)
     --local function format()
@@ -129,8 +144,11 @@ local on_attach = function(client, bufnr)
 
     local opts = { noremap = true, silent = true }
 
+    -- _a: LSP code action
     buf_set_keymap("n", "_a", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+    -- v: _a: LSP code action on the selection
     buf_set_keymap("v", "_a", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
+    -- _A: code actions with diff preview (actions-preview)
     vim.keymap.set("n", "_A", require("actions-preview").code_actions, opts)
 end
 

@@ -1,7 +1,9 @@
 " macOS-only mappings and helpers.
 nmap <c-w> <CMD>tabclose<CR>
 
+" mf: open the current file's directory in Finder
 nnoremap mf <CMD>execute '!open ' . shellescape(expand('%:p:h'))<CR>
+" \mF: open vim's cwd in Finder
 nnoremap <leader>mF <CMD>execute '!open ' . shellescape(getcwd())<CR>
 
 " Preserve the Mac branch's repo shortcut after the common Git mappings load.
@@ -40,14 +42,18 @@ function! TermO() abort
     call luaeval('Snacks.terminal.open()')
 endfunction
 
+" \ot: open a Snacks.nvim terminal in a new tab
 nnoremap <leader>ot <CMD>tabnew <bar> call TermO()<CR>:startinsert<CR>
+" \tt: built-in terminal in a right vsplit (40% width), cwd = current file's dir
 nmap <leader>tt <CMD>call TermOV(1)<CR>:startinsert<CR>
+" \Tt: built-in terminal in a right vsplit (40% width), cwd = vim's cwd
 nmap <leader>Tt <CMD>call TermOV(0)<CR>:startinsert<CR>
 
 function! StashAll() abort
     let l:stash = input('Enter name: ')
     execute '!git stash push -m ' . shellescape(l:stash)
 endfunction
+" \Gs: git stash push with a prompted stash name
 nmap <leader>Gs <CMD>call StashAll()<CR>
 
 function! s:MmdReport(name, code, err) abort
@@ -103,7 +109,9 @@ augroup END
 
 augroup MmdMappings
     autocmd!
+    " \mc (*.mmd): compile this .mmd to PDF via compile_mmd.sh, async, result notified
     autocmd BufRead,BufNewFile *.mmd nnoremap <buffer> <leader>mc :call CompileMmd()<CR>
+    " \ma (*.mmd): toggle auto-compile of this .mmd on save
     autocmd BufRead,BufNewFile *.mmd nnoremap <buffer> <leader>ma :call ToggleMmdAutoCompile()<CR>
 augroup END
 
@@ -125,5 +133,6 @@ if has('mac') && exists('*maplist')
     unlet! s:m s:mode_cmd
     " FileType-defined maps are not in maplist() yet at startup; add explicitly.
     imap <D-]> <M-]>
+    " i: D-[: alias for M-[ (minuet: previous inline suggestion)
     imap <D-[> <M-[>
 endif

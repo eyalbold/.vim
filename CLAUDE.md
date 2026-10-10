@@ -12,6 +12,7 @@ Personal Neovim (and legacy Vim) configuration.
 
 - Note as a general search takes a lot of time, try to restrict to relevant files (i.e. plugins) , or git ls-files
 - try to locate things in the relevant files mentioned here
+- When adding a mapping, put a one-line comment right above it saying what it does, in the existing style: `" \xx: description` (vimscript) or `-- \xx: description` (Lua). Check the key is unused first (grep `mappings*.vim`, `myinit.lua`, `myplugins/`).
 
 
 ## Key files

@@ -63,7 +63,9 @@ nnoremap <leader>xf <CMD>call DiagnosticsGitOnly()<CR><CMD>exe "Cfilter " . fil<
  endfunction
  
  
+ " i: C-l: undo last change without leaving insert mode
  imap <c-l> <c-o>u
+ " c: C-y: insert next key literally on the command line (vanilla C-v)
  cnoremap <c-y> <c-v>
  function! AlignWithTopLine() range
  " Handle case when selection is at the start of the file
@@ -351,8 +353,11 @@ nnoremap mS <CMD>call ToggleSearch()<CR>
 ":nmap ( <CMD>exec "normal i".nr2char(getchar())."\e"<CR>
 ":nmap ) <CMD>exec "normal a".nr2char(getchar())."\e"<CR>
 :nnoremap [( (<CR>
+" [9: shift-less alias of [( (now sentence-back + line down; leftover of old
 :nnoremap [9 (<CR>
+" [): same as [(
 :nnoremap [) (<CR>
+" [0: shift-less alias of [)
 :nnoremap [0 )<CR>
 " s: insert N chars before cursor (replaces substitute)
 " nmap <Plug>(arpeggio-default:s) <CMD>call InsertBefore(v:count1)<CR>
@@ -391,6 +396,7 @@ nmap <nowait> t <CMD>let g:init=1<CR><CMD>w<CR>
 
 " Vanilla backtick (jump to mark; ` itself may be remapped)
 nnoremap <leader>` `
+" m`: vanilla backtick (jump to mark), same as \`
 nnoremap m` `
 "nnoremap <leader>t t
 " Set mark (m is repurposed as second leader; use \Z to mark)
@@ -433,7 +439,9 @@ nmap m, <CMD>LeaderfEnablePreview<CR><CMD>Leaderf line --popup<CR>
 nmap _g <CMD>diffget<CR>
 " Diff put (send change to other buffer)
 nmap _p <CMD>diffput<CR>
+" v: _g: diffget for the selected lines
 vmap _g :'<,'>diffget<CR>
+" v: _p: diffput for the selected lines
 vmap _p :'<,'>diffput<CR>
 
 " Go to last visited real buffer
@@ -457,6 +465,7 @@ endfunction
 function! ScopedCd(dir) abort
     exe (haslocaldir(0) ? 'lcd' : haslocaldir(-1, 0) ? 'tcd' : 'cd') fnameescape(a:dir)
 endfunction
+" _m: toggle cd scope used by _. / _- between tab-local (tcd) and global (cd)
 nmap _m <CMD>let g:cd_mode = (g:cd_mode == 'tab' ? 'global' : 'tab') \| echo 'cd mode: ' . g:cd_mode<CR>
 " _.: cd to parent directory
 nmap _. <CMD>call CdModeCmd('..')<CR>
@@ -464,6 +473,7 @@ nmap _. <CMD>call CdModeCmd('..')<CR>
 nmap _- <CMD>call CdModeCmd('-')<CR>
 "previous window
 nmap _P <CMD>wprevious<CR>
+" _N: write current file + go to next file in arglist (:wnext)
 nmap _N <CMD>wnext<CR>
 " Open workspace picker
 nmap _wo <CMD>WorkspacesOpen<CR>
@@ -664,11 +674,13 @@ nmap F <m-[>
 function! FF_f2()
 return "\<Plug>(QuickScopef)"
 endfunction
+" M-]: lightspeed-f forward with QuickScope highlights
 nmap <expr> <m-]> FF_f()
 
 function! FF_T2()
 return "\<Plug>(QuickScopeF)"
 endfunction
+" M-[: lightspeed-F backward with QuickScope highlights
 nmap <expr> <m-[> FF_F()
 
 
@@ -698,6 +710,7 @@ autocmd FileType * inoremap <expr> <m-[> IsRegular() ? "\<c-o>\<Plug>(QuickScope
 "nmap <M-/> <Plug>(easymotion-tl)
 "imap <M-t> <c-o><CMD>call Teasy()<CR> 
 nmap <M-t> <Plug>(easymotion-bd-tl)
+" i: M-t: QuickScope till-char from insert mode
 imap <M-t> <c-o><Plug>(QuickScopet)
 "imap <M-]> <c-o><Plug>(QuickScopef)
 " M-t: QuickScope till-char (normal/visual/op-pending)
@@ -785,14 +798,18 @@ nmap <c-t> <cmd>tabnew<CR>
 nmap <c-f> mH
 "nmap <c-g> <CMD>call CocActionAsync("doHover")<cr>
 
+" C-e: add a blank line below, cursor stays on current line
 nmap <C-e> mn-
 
+" M-E: add a blank line above, cursor stays on current line
 nmap <M-E> -mn+
+" M-e: same as M-E (blank line above, cursor stays)
 nmap <M-e> -mn+
 
 "repeat the move
 " Repeat last f/t motion in insert mode
 imap <c-;> <c-o>;
+" i: C-\: pass C-\ through to normal mode
 imap <c-\> <c-o><c-\>
 "to map <c-;> in normal
 
@@ -1147,6 +1164,7 @@ nnoremap msl <CMD>%s/\s\+$//e<CR>
 nnoremap msc <CMD>%s/^\(.\{-\}\)[ ]*$/\1<CR>
 " msp - paste from clipboard, remove newlines, trailing spaces, and leading spaces after newlines/tabs, save file
 nnoremap msp :let @p=substitute(substitute(substitute(@+,' \+\n','\n','g'),'\([\n\t]\) \+','\1','g'),'\n','','g')<CR>"pp:w<CR>
+" msg: open the file whose path is in the clipboard (newlines/extra spaces stripped)
 nnoremap msg :let @p=substitute(substitute(substitute(@+,' \+\n','\n','g'),'\([\n\t]\) \+','\1','g'),'\n','','g')<CR>:exec ":e ". @p<CR>
 "open cur folder 
 "nmap mt <CMD>NvimTreeClose<CR>:<CMD>echom ":NvimTreeOpen ".getcwd() <CR>:<CMD>exec ":NvimTreeOpen ".escape(getcwd(),'\')<CR> 
@@ -1165,7 +1183,9 @@ nnoremap <leader>lp <CMD>LeaderfTogglePreview<CR>
 nnoremap mu <CMD>UndotreeToggle<CR>
 "nnoremap mu <CMD>MundoShow<CR>
 
+" mws: save current CtrlSpace workspace
 nnoremap mws <CMD>CtrlSpaceSaveWorkspace<CR>
+" mwd: save CtrlSpace workspace 'default' with g:overrideCWD temporarily off
 nnoremap mwd <CMD>let g:overrideCWD=0<CR>:<CMD>CtrlSpaceSaveWorkspace default<CR>let g:overrideCWD=1<CR>
 
 " TT: find current word in buffer lines (LeaderfLine)
@@ -1219,7 +1239,9 @@ nmap m{ ysiW{
 nmap m[ ysiW[
 nmap m( ysiW(
 
+" M,: CtrlP file picker
 nnoremap M, <CMD>CtrlP<CR>
+" m.: clear CtrlP cache, then open CtrlP
 nnoremap m. <CMD>CtrlPClearCache<CR><CMD>CtrlP<CR>
 " mj: clear search highlight
 nnoremap mj <CMD>set nohlsearch<CR>
@@ -1257,7 +1279,9 @@ nnoremap <leader>R R
 "c-q for insert mode%. R for other modes.
 func! MapR()
     let lst=['+','*','.','=','%']
+" i: M--: echo clipboard (+) register contents
 imap <M--> <CMD>:echo getreg("+")<CR>
+" i: M-=: echo expression (=) register contents
 imap <M-=> <CMD>:echo getreg("=")<CR>
     for i in range(10)
             call add(lst,string(i))
@@ -1290,10 +1314,12 @@ nnoremap <silent> <C-a>c <CMD>call fzf#run({'source': GetCommands(),'sink': func
 noremap <silent> <C-a>m <CMD>Maps<CR>
 " C-a M: fzf keymap picker (key + description)
 nnoremap <silent> <C-a>M <CMD>call fzf#run({'source': GetMappings(),'options': '-m'} )<CR>
+" \|: vanilla | (go to column N); plain | is the buffer picker
 nnoremap <leader><bar> <bar>
 "nnoremap <silent> <bar> <CMD>call FZFOpen(':Buffers')<CR>
 "<M-Bslash>
 "<M-Bslash>
+" |: Leaderf buffer picker, preview off, jumps to existing window
 nmap <bar> <CMD>let g:Lf_JumpToExistingWindow = 1<CR><CMD>LeaderfDisablePreview<CR><CMD>Leaderf --popup buffer --all<CR>
 " |: fzf buffer picker
 "nmap <bar> <CMD>FzfLua buffers<CR>
@@ -1349,11 +1375,13 @@ nnoremap <c-a>F <CMD>Telescope find_files<CR>
 nnoremap <c-a>j <CMD>lua require('telescope.builtin').jumplist({fname_width=80 , layout_config = {      preview_width = 0.6,       width = 0.9     }})<CR>
 "files current file
 "66444
+" C-a F: Leaderf file picker in current file's dir
 nnoremap <silent> <C-a>F <CMD>exe ":LeaderfFile " . expand('%:p:h')<CR>
 " C-a h: file open history (fzf)
 nnoremap <silent> <C-a>h <CMD>call FZFOpen(':History')<CR>
 " C-a H: bash history picker
 nmap <silent> <C-a>H <CMD>call fzf#run({'source':"cat ~/.bash_history \<bar> sort \<bar> uniq",'sink': function('BH')})<CR>
+" C-a a: fzf Ag search (:Ag via FZFOpen)
 nnoremap <silent> <C-a>a <CMD>call FZFOpen(':Ag')<CR>
 "nnoremap <silent> <C-a>d <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('CdDirPlug'),'options': '-m'})<CR>
 " C-a d: directory picker (cd to selected dir)
@@ -1370,6 +1398,7 @@ nnoremap <silent> <C-a>W <CMD>call FzfWorktreeSelect()<CR>
 nnoremap <silent> <C-a>w <CMD>FzfLua tabs<CR>
 " C-a b: window picker (Leaderf)
 nnoremap <silent> <C-a>b <CMD>Leaderf window<CR>
+" C-a s: fzf snippet picker (:Snippets)
 nnoremap <silent> <C-a>s <CMD>call FZFOpen(':Snippets')<CR>
 "use it to increase
 " C-a C-a: vanilla increment number (C-a alone is used as prefix)
@@ -1378,6 +1407,7 @@ nnoremap <silent> <C-a><C-a> <C-a>
 " open FZF in
 " current file's2 directory
 "
+" \W: enable line wrap
 nmap <leader>W <CMD>set wrap<CR>
 
 function! GitTopLevel()
@@ -1402,10 +1432,13 @@ nmap mG <CMD>execute 'Git -C ' . fnameescape(expand('%:p:h'))<CR>
 " \g2 / \g3: diffget from buffer 2 or 3 (3-way merge)
 map <leader>g2 :diffget \\2<CR>
 map <leader>g3 :diffget \\3<CR>
+" \Grc: git rebase --continue
 nnoremap <leader>Grc <CMD>Git rebase --continue<CR>
 
+" \Gra: git rebase --abort
 nnoremap <leader>Gra <CMD>Git rebase --abort<CR>
 
+" \Gw: Gwrite (stage current file)
 nnoremap <leader>Gw <CMD>Gwrite<CR>
 
 " \AC: amend last commit with current file changes
@@ -1439,7 +1472,9 @@ nnoremap <leader>GD <CMD>Gvdiffsplit!<CR>
 nnoremap <leader>Ge <CMD>Gedit<CR>
 " \Gr: revert current file to HEAD
 nnoremap <leader>Gr <CMD>Gread<CR>
+" \Gmo: git merge origin/master resolving conflicts as ours
 nnoremap <leader>Gmo Git merge --strategy-option ours origin/master<CR>
+" \Gmt: git merge origin/master resolving conflicts as theirs
 nnoremap <leader>Gmt Git merge --strategy-option theirs origin/master<CR>
 "Git log all commits
 nnoremap <leader>Gl <CMD>silent! Glog<CR>
@@ -1470,6 +1505,7 @@ nmap <leader>Gw mc:Gw<CR>\Gc
 "nnoremap <leader>Gra <CMD>Git rebase --abort<CR>
 
 
+" \?: IPython info for word under cursor
 map <silent> <leader>? <Plug>(IPy-WordObjInfo)
 " opens terminal in new window
 "
@@ -1648,6 +1684,7 @@ function! LfFil(a)
 
 endfunction
 
+" \jf: format buffer as JSON with jq (via wsl)
 nmap <leader>jf <Cmd>call FormatJson()<CR>
 "opens file
 " filefolder, git files
@@ -1668,7 +1705,9 @@ nmap <c-a>" mc<leader>vn<CMD>cd `=systemlist("git rev-parse --show-toplevel")[0]
 " LSP doc symbols
 " M-,: LSP document symbols (Telescope)
 "nnoremap <m-i> :Telescope lsp_document_symbols<CR>
+" M-g: LSP document symbols (Telescope)
 nmap <m-g> <CMD>Telescope lsp_document_symbols<CR>
+" C-g: LSP workspace symbols (Telescope, via _O)
 nmap <c-g> _O
 "workspace symbols
 "nmap <m-,> _O
@@ -1681,12 +1720,14 @@ nmap mo <CMD>call CloseVisibleNvimTreeBuffers()<CR><CMD>call CloseVspIfNeed()<CR
 function! JJJ()
 call feedkeys("mo\<C-b>")
 endfunction 
+" <plug>ttt: helper for C-b — runs mo then C-b
 nmap <plug>ttt <CMD>call JJJ()<CR>
 " mo + buf search in vsplit
 nmap <expr> <c-b> "<plug>ttt"
 function! JJX()
     call feedkeys("\<bar>\<C-b>")
 endfunction
+" <plug>ttx: helper — | buffer picker then C-b
 nmap <plug>ttx <CMD>call JJX()<CR>
 " | + buf search (no vsplit)
 "nmap <expr> <c-\> "<plug>ttx"
@@ -1710,6 +1751,7 @@ nmap <leader>of <CMD>call CloseVspIfNeed()<CR><CMD>vnew<CR><CMD>call fzf#run({'s
 nmap <leader>op :sp <bar> :exec ':'. bufnr("\[jupyter\]") .'buffer'<CR><c-w>k
 " \oC: focus Claude panel matching current cwd (falls back to any claude terminal)
 nmap <leader>oC <CMD>lua FocusClaudeCwd()<CR>
+" \upd: open terminal (\tt) and type 'upama' (no Enter)
 nmap <leader>upd \ttupama
 
 
@@ -1737,10 +1779,15 @@ nmap <leader>ge <CMD>VimscriptLastError<CR>
 
 " \vL: open vimlog.log in tab
 nnoremap <leader>vL :TN ~/.vim/vimlog.log<CR>
+" \vs: Vimspector stop
 nmap <leader>vs         <Plug>VimspectorStop
+" \vR: Vimspector restart
 nmap <leader>vR         <Plug>VimspectorRestart
+" \vp: Vimspector pause
 nmap <leader>vp         <Plug>VimspectorPause
+" \vl: Vimspector launch
 nmap <leader>vl        :call vimspector#Launch()<CR>
+" \vr: Vimspector reset (close debugger UI)
 nmap <leader>vr        :call vimspector#Reset()<CR>
 "sets python 2/3
 "nmap <leader>S2 :let $PYTHONPATH='/Users/eyalkarni/utils/jmpacket:/Users/eyalkarni/utils:/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages'<CR>
@@ -1781,12 +1828,15 @@ nnoremap <leader>k <CMD>wincmd k<CR>
 
 
 
+" \j: go to split below
 nnoremap <leader>j <CMD>wincmd j<CR>
+" \l: go to split right
 nnoremap <leader>l <CMD>wincmd l<CR>
 " \mt / \nt: next / previous tab
 nnoremap <leader>mt <CMD>tabnext<CR>
 nnoremap <leader>nt <CMD>tabprevious<CR>
 
+" ml / mj / mk / mh: go to split right / below / above / left
 nmap ml <leader>l
 nmap mj <leader>j
 nmap mk <leader>k
@@ -1856,7 +1906,9 @@ endfunction
 "nmap ` i
 "imap ` <ESC>
 "inoremap <c-]> `
+" i: C-`: run one normal-mode command (like C-o)
 imap <c-`> <c-O>
+" C-`: Esc
 nmap <c-`> <esc>
 "duplicate in onload because of mapping
 "
@@ -1892,11 +1944,13 @@ nnoremap DD "zdd
 nnoremap C <CMD>call StartSpecialInsert()<CR>ci
 " cc: vanilla C (change to end of line)
 nnoremap cc C
+" \C: vanilla cc (change whole line)
 nnoremap <leader>C cc
 
 " c: change and save displaced text to register z [replaces default c]
 nnoremap c "zc
 "vnoremap cc "zcc
+" v: c: change selection, saving it to register z
 vnoremap c "zc
 
 "We want to keep the pasted text, while z is the presented text in the visual
@@ -1933,6 +1987,7 @@ noremap <leader>Y "zyi
 "nnoremap Y <CMD>set incsearch<CR>/\c
 "nnoremap , :set incsearch<CR>/\c
 "nnoremap <C-[> :set incsearch<CR>/\c
+" v: af: select a whole function (textobj-function)
 vnoremap <nowait> af <Plug>(textobj-function-a) 
 
 "execute a function based on the current visual selection but replace content of selection
@@ -2014,6 +2069,7 @@ vmap my "xy<CMD>call GoOther()<CR>"xp<CMD>call GoOther()<CR>
 
 " C-': switch to the other split (left↔right); enters insert if terminal
 nnoremap <C-'> <CMD>call GoOther()<CR><CMD>call IfTerm()<CR>
+" t: C-': switch to the other split from terminal mode
 tnoremap <C-'> <C-\><C-n><CMD>call GoOther()<CR>
 
 " terminal mappings !
@@ -2163,6 +2219,7 @@ nmap <nowait> <leader>s <CMD>Navbuddy<CR>
 
 
 
+" \gl: YcmCompleter GoToDeclaration
 noremap <leader>gl <CMD>YcmCompleter GoToDeclaration<CR>
 "let g:ycm_key_invoke_completion="<C-b>" "ctrl i ?
 "let g:ycm_key_detailed_diagnostics='<leader>wd'
@@ -2681,19 +2738,30 @@ vmap <leader>GR "xy<CMD>call GitFPat("",1,@x)<CR>
 vmap <leader>gR "xy<CMD>call GitFPat("",0,@x)<CR>
 vmap <leader>gr "xy<CMD>call GitFPat(GetExtPat(),0,@x)<CR>
 
+" v: C-a g: Leaderf interactive rg seeded with the selection
 vnoremap <c-a>g "xy<CMD>call feedkeys( ":LeaderfRgInteractive\<lt>CR>". @x . "\<lt>CR>\<lt>CR>")<CR>
+" v: C-y: alias for \GR (rg selection in all git files, file's dir root)
 vmap <c-y> <leader>GR
 "vnoremap <leader>gr "xy<CMD>call feedkeys( ":LfGitGen .*\\.py$\<lt>CR>". @x . "\<lt>CR>")<CR>
 
+" mr: alias for \gr (rg in git repo, same filetype, cwd root)
 map mr <leader>gr
+" mR: alias for \gR (rg in git repo, all files, cwd root)
 map mR <leader>gR
+" MR: alias for \GR (rg in git repo, all files, file's dir root)
 map MR <leader>GR
+" Mr: alias for \Gr (rg in git repo, same filetype, file's dir root)
 map Mr <leader>Gr
 
+" ML: rg again over the last git file list with a new pattern (file's dir root)
 nmap ML <CMD>call GitFLast(1)<CR>
+" \mr: quickfix list of git files with the same filetype (cwd root)
 nmap <leader>mr "xy<CMD>call FillQFGitF(GetExtPat(),0)<CR>
+" \mR: quickfix list of all git files (cwd root)
 nmap <leader>mR "xy<CMD>call FillQFGitF("",0)<CR>
+" \Mr: quickfix list of git files with the same filetype (file's dir root)
 nmap <leader>Mr "xy<CMD>call FillQFGitF(GetExtPat(),1)<CR>
+" \MR: quickfix list of all git files (file's dir root)
 nmap <leader>MR "xy<CMD>call FillQFGitF("",1)<CR>
 
 "nmap mr <CMD>call nvim_set_current_dir(expand('%:p:h'))<CR><leader>gr 
@@ -2754,9 +2822,12 @@ nmap <leader>MR "xy<CMD>call FillQFGitF("",1)<CR>
 endfunction
  
 
+" gf: smarter gf — handles file:line refs and Python traceback lines, jumps to the line
 nmap gf <CMD>call DoGF()<CR>
 
+" \]: set mark C, close buffer, open the file path held in the clipboard
 nmap \] mC<CMD>bd<CR>:e <C-R>=@*<CR><CR>
+" \gv: Leaderf rg over top-level *.vim/*.lua in ~/.vim (cd there first)
 nmap <leader>gv <CMD>exe 'cd '.g:user_home.'\.vim'<CR><CMD>Leaderf rg --glob "*.vim" --glob "*.lua" --max-depth=1<CR>
 "nmap {          <Plug>EnhancedJumpsOlder
 "nmap }          <Plug>EnhancedJumpsNewer
@@ -2764,7 +2835,9 @@ nmap <leader>gv <CMD>exe 'cd '.g:user_home.'\.vim'<CR><CMD>Leaderf rg --glob "*.
 "nmap g}         <Plug>EnhancedJumpsLocalNewer
 "nmap <Leader>{  <Plug>EnhancedJumpsRemoteOlder
 "nmap <Leader>}  <Plug>EnhancedJumpsRemoteNewer
+" z;: EnhancedJumps — go to older far-away change position
 nmap z; <Plug>EnhancedJumpsFarChangeOlder
+" z,: EnhancedJumps — go to newer far-away change position
 nmap z, <Plug>EnhancedJumpsFarChangeNewer
 
 command! -nargs=1 ReloadPackage <CMD>exe "cd ".g:user_home."/.vim" <bar> lua require('funcs').reload_package(<f-args>)
@@ -2772,21 +2845,27 @@ command! -nargs=1 ReloadPackage <CMD>exe "cd ".g:user_home."/.vim" <bar> lua req
 "function! GetVoice()
     "return py3eval('recognize_voice()')
 "endfunction 
+" C-L: run :Voice
 nmap <c-L> <CMD>Voice<CR>
 
+" i: C-L: insert voice-recognition result via GetVoice()
 imap <C-L> <C-R>=GetVoice()<CR>
 
+" \rch: rewrite truncated plugged/ChatGPT.nvim paths in buffer to absolute ~/.vim/plugged paths
 nmap <leader>rch <cmd>exe '%s#\(\.\.\.\)\?\(.*\)\(plugged\)#'.escape(g:user_home.'\.vim\plugged','\\').'#g'<CR><cmd>exe '%s#\c\(\.\.\.\)\?\(.*\)\(chatgpt.nvim\)#'.escape(g:user_home.'\.vim\plugged\ChatGPT.nvim','\\').'#g'<cr>
 function! MapCC()
     if &buftype == ""
+        " C-x (normal buffers): \pc then C-L
         nmap <buffer> <c-x> <leader>pc<C-L> 
     endif
 endfunction 
 autocmd FileType * call MapCC()
+" v: \\v: vim-visual-multi — add the selection as another cursor
 vmap \\v <Plug>(VM-Visual-Add)
 "%s/^.\{-}",".\{-}",".\{-}","\(.\{-}\)".*/\1
 
 
+" \\.: re-run the last command-line command, output captured in a new tab
 nmap \\. <CMD>call Exec(expand('@:'))<CR>
 "call nvim_input('ea<BS><tab>')<CR><CMD>call timerstart(1,"call nvim_input('<tab><c-y>')")<CR>
 "
@@ -2800,20 +2879,30 @@ nmap \\. <CMD>call Exec(expand('@:'))<CR>
 "nmap _I <CMD>NayvyImportFZF<CR>
 
 
+" \ro (localleader): Magma — evaluate motion text in the Jupyter kernel
 nnoremap <expr><silent> <LocalLeader>ro  nvim_exec('MagmaEvaluateOperator', v:true)
+" \rr (localleader): Magma — evaluate current line
 nnoremap <silent>       <LocalLeader>rr <CMD>MagmaEvaluateLine<CR>
+" v: \r (localleader): Magma — evaluate selection
 xnoremap <silent>       <LocalLeader>r  :<C-u>MagmaEvaluateVisual<CR>
+" \rc (localleader): Magma — re-evaluate current cell
 nnoremap <silent>       <LocalLeader>rc <CMD>MagmaReevaluateCell<CR>
+" gw: run :Wtf
 nmap gw <CMD>Wtf<CR>
+" \hs: GitGutter — stage hunk under cursor
 nmap <leader>hs <Plug>(GitGutterStageHunk)
+" \hu: GitGutter — undo hunk under cursor
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
 function! StashME()
  let stash = input('Enter name: ')
  exec "!git stash push -m \"". stash . '" -- '. expand('%') .' && git stash apply --index'
 endfunction
+" \GS: git stash only the current file under a prompted name, then re-apply it
 nmap <leader>GS <CMD>call StashME()<CR>
+" \gp: open current file at the current line in PyCharm (pycharmst.py)
 nmap <leader>gp <CMD>exec '!python '.g:user_home.'/.vim/pycharmst.py "'. expand('%') . '" ' .line('.')<CR>
+" \gc: cd to ~/compare-my-stocks
 nmap <leader>gc <CMD>cd ~/compare-my-stocks<CR>
 function! LfFil(a)
 exec " :LeaderfFile ". a:a
@@ -2822,7 +2911,9 @@ function! DoMGf(a)
     exec "cd " .a:a
     norm \gf
 endfunction 
+" \mo: fzf-pick a recent dir → LeaderfFile in it
 nmap <leader>mo <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('LfFil')})<CR>
+" \MO: fzf-pick a recent dir → cd there + \gf (Telescope git files)
 nmap <leader>MO <CMD>call fzf#run({'source': uniq(sort(g:dirs)),'sink':function('DoMGf')})<CR>
 
 " Ask pr-base.sh for a PR's base; returns '' and echoes on failure.
@@ -2830,12 +2921,14 @@ function! PrBaseRev(pr, flags) abort
     let l:cmd = 'cd ' . shellescape(GitTopLevel()) . ' && '
         \ . shellescape(g:user_home . '/scripts/pr-base.sh') . a:flags
         \ . (empty(a:pr) ? '' : ' ' . shellescape(a:pr))
-    let l:out = trim(system(l:cmd))
+    let l:lines = systemlist(l:cmd)
     if v:shell_error
-        echohl ErrorMsg | echo 'PrBase: ' . l:out | echohl None
+        echohl ErrorMsg | echo 'PrBase: ' . join(l:lines, ' ') | echohl None
         return ''
     endif
-    return l:out
+    " Warnings (stderr) precede the rev, which is always the last line.
+    for l:w in l:lines[:-2] | echohl WarningMsg | echo l:w | echohl None | endfor
+    return trim(get(l:lines, -1, ''))
 endfunction
 
 " :PrDiff [<pr>] — Diffview of a whole PR: everything since the commit it
@@ -2846,21 +2939,26 @@ function! PrDiff(pr) abort
 endfunction
 command! -nargs=? PrDiff call PrDiff(<q-args>)
 
-" :PrDiffCur [<pr>] — same base, but the right side is the working tree
+" :PrDiffCur [<pr>] — same idea, but the right side is the working tree
 " (diffview's LOCAL): the PR's changes plus anything uncommitted on top.
-function! PrDiffCur(pr) abort
-    let l:rev = PrBaseRev(a:pr, '')
+" The base is the fork point of the LOCAL HEAD; :PrDiffCur! uses the pushed
+" PR head's fork point instead (wrong when the checkout lags a rebase).
+function! PrDiffCur(pr, bang) abort
+    let l:rev = PrBaseRev(a:pr, a:bang ? ' --remote' : '')
     if !empty(l:rev) | exe 'DiffviewOpen ' . l:rev | endif
 endfunction
-command! -nargs=? PrDiffCur call PrDiffCur(<q-args>)
+command! -nargs=? -bang PrDiffCur call PrDiffCur(<q-args>, <bang>0)
 
 command! -nargs=0 -bang AmendCur  :Gw | :Git commit --amend -v -q --no-edit | :exec ("<bang>"=="!" ? "Git push --force" : "echo")
 command! -nargs=0 -bang  AmendAll   :Git commit --amend -a -v -q --no-edit | :exec ("<bang>"=="!" ? "Git push --force" : "echo")
 
+" \w: Gwrite (save + git add current file)
 nnoremap <leader>w <CMD>Gwrite<CR>
+" \gC: rg in git repo, all files (cwd root) — same as \gR
 nmap <leader>gC <CMD>call GitF("",0)<CR>
 " Save all files, redraw, then push once after five seconds.
 nnoremap Zp <CMD>norm ZZ<CR><CMD>redraw<CR><CMD>call timer_start(5000, {timer -> execute('G push')})<CR>
+" ZP: like Zp, but push with --force-with-lease
 nnoremap ZP <CMD>norm ZZ<CR><CMD>redraw<CR><CMD>call timer_start(5000, {timer -> execute('G push --force-with-lease')})<CR>
 " Get the directory of a file
 " - On Ex command lines, returns the directory of the file ('./' for new files)
@@ -2876,6 +2974,7 @@ function! Command_dir(keymap) abort
   endif
   return l:dir . g:path_separator
 endfunction
+" c: %%: expands to the current file's dir on the : command line
 cnoremap <expr> %% Command_dir('%%')
 "delete same file
 nmap <leader>ds <CMD>let current_bufname = expand('%:t') <bar> let current_bufnr = bufnr('%') <bar> for i in range(1, bufnr('$')) <bar> if bufexists(i) && i != current_bufnr && bufname(i) =~ current_bufname <bar> execute 'bdelete' i <bar> endif <bar> endfor<CR>
@@ -2892,7 +2991,9 @@ function! OpenSameFileInVSplit()
 endfunction
 
 
+" \dsp: open another buffer with the same filename in a vsplit
 nmap <leader>dsp <CMD>call OpenSameFileInVSplit()<CR>
+" \dD: vsplit the same-named buffer and diff it against the current one
 nmap <leader>dD <CMD>call OpenSameFileInVSplit()<CR><CMD>diffthis<CR><CMD>call GoOther()<CR><CMD>diffthis<CR>
 "nmap _A <CMD>lua require("actions-preview").code_actions()<CR>
 
@@ -2906,9 +3007,13 @@ nmap <leader>dD <CMD>call OpenSameFileInVSplit()<CR><CMD>diffthis<CR><CMD>call G
 function! SE()
     call feedkeys("\<CR>")
 endfunction 
+" \gg: open bookmark list, EasyMotion-pick a line and press Enter to jump to it
 nmap <leader>gg <CMD>BookmarkGo<CR><CMD>call EasyMotion#SolEnter(0,2,'call SE()')<CR>
+" \GG: open bookmark list (vim-bookmark)
 nmap <leader>GG <CMD>BookmarkGo<CR>
+" \ga: add a bookmark at the current position (vim-bookmark)
 nmap <leader>ga <CMD>BookmarkAdd<CR>
+" ?: Telescope jumplist (alias for C-a j; replaces backward search)
 nmap ? <c-a>j
 
 function! DDa()
@@ -2919,6 +3024,7 @@ function! DDa()
 
 
 
+" \XD: LSP diagnostics of current buffer → loclist
 nnoremap <leader>XD <CMD>lua vim.diagnostic.setloclist()<CR>
 
 " Copy diagnostics to clipboard
@@ -2950,6 +3056,7 @@ lua << EOF
 EOF
 endfunction
 
+" \xc: copy current buffer's LSP diagnostics to the clipboard
 nnoremap <leader>xc <CMD>call CopyDiagnosticsToClipboard()<CR>
 
 "check file
@@ -2962,8 +3069,10 @@ nnoremap <leader>XR <CMD>lolder<CR>
 
 "to paste with formatting
 
+" i: C-i: set mark P at cursor
 imap <c-i> <c-o><CMD>norm mP<CR>
 
+" \dx: diff current window against the other split
 nmap <leader>dx <CMD>diffthis<CR><CMD>call GoOther()<CR><CMD>diffthis<CR>
 
 
@@ -2971,16 +3080,24 @@ nmap <leader>dx <CMD>diffthis<CR><CMD>call GoOther()<CR><CMD>diffthis<CR>
 
 "nnoremap <leader>Gcv <CMD>Git commit -v -q<CR>
 
+" \GHO: Diffview file history of the repo
 nmap <leader>GHO :DiffviewFileHistory<CR>
+" \GH: Diffview file history of the repo vs working tree
 nmap <leader>GH :DiffviewFileHistory --base=LOCAL<CR>
+" \GHF: Diffview file history of all refs incl. reflogs
 nmap <leader>GHF :DiffviewFileHistory --all --walk-reflogs<CR>
+" \Gh: Diffview history of current file, all refs + reflogs, vs working tree
 nmap <leader>Gh :DiffviewFileHistory --base=LOCAL --walk-reflogs --all %<CR>
+" \gh: Diffview history of current file vs working tree
 nmap <leader>gh :DiffviewFileHistory --base=LOCAL %<CR>
+" \Gho: same as \GH (Diffview repo history vs working tree)
 nmap <leader>Gho :DiffviewFileHistory --base=LOCAL<CR>
+" \Ghn: same as \gh (Diffview current-file history vs working tree)
 nmap <leader>Ghn :DiffviewFileHistory --base=LOCAL %<CR>
 
 
 
+" msS: strip all whitespace in the whole file
 nnoremap msS <CMD>%s/\s//g<CR>
 
 
@@ -2990,6 +3107,7 @@ nnoremap msd <CMD>silent! %s/\r\r/\r/g<CR><CMD>silent! %s/\n\n/\r/g<CR><CMD>sile
 
 
 
+" mst: strip all spaces on the current line
 nmap mst <CMD>s/ //g<CR>
 
 
@@ -3001,19 +3119,28 @@ nmap mst <CMD>s/ //g<CR>
 
 "nnoremap <leader>A A
 
+" %: jump between matching quotes under cursor, else matchup-% (vim-matchup)
 nmap % <Plug>(MatchMetaN)
 
+" i: M-b: insert next key literally (C-v)
 inoremap <m-b> <c-v>
+" c: M-b: insert next key literally (C-v) on the command line
 cnoremap <m-b> <c-v>
+" R: record macro (vanilla q; replaces R=replace mode)
 nnoremap R q
 cabbr %G Gvdiffsplit
 "nmap <leader>AC <CMD>AvanteAsk /clear<CR>
+" \ae: Avante — AI edit prompt
 nmap <leader>ae <CMD>AvanteEdit<CR>
+" v: \ae: Avante — AI edit prompt for the selection
 vmap <leader>ae <CMD>AvanteEdit<CR>
+" \rF: re-source the current file
 nmap <leader>rF <CMD>source %<CR>
 
 
+" \ti: append "# pyright: ignore" to the current line
 nnoremap <leader>ti A  # pyright: ignore<Esc>
+" M-.: run macro @a (set via \tm)
 nmap <m-.> <CMD>norm @a<CR>
 " Define mapping as @a . you can also repeat it with <c-.>
 nmap <leader>tm <CMD>call DoTM()<CR>
@@ -3029,11 +3156,15 @@ execute a:firstline . ',' . a:lastline . 's/^\(.*\)$/"\1",/'
 execute a:firstline . ',' . a:lastline . 'join'
 norm $x
 endfunction
+" \vn: open a vsplit (closing an existing extra vsplit first)
 nmap <leader>vn <cmd>call CloseVspIfNeed()<CR><CMD>:vnew<CR>
+" C-,: cd to file's dir + \ac (toggle Claude Code terminal)
 nmap <c-,> mc<leader>ac
+" \aF: cd to file's dir, stop and reopen Claude Code there
 nmap <leader>aF mc<CMD>ClaudeCodeStop<CR>ClaudeCodeOpen<CR>
 " \ah: claude-history picker (`ci`) in a claudecode.nvim terminal; ^R resumes a session
 nmap <leader>ah <CMD>lua ClaudeHistory()<CR>
+" \mM: toggle Minuet inline-completion virtual text
 nmap <leader>mM <CMD>Minuet virtualtext toggle<CR>
 "nmap <leader>hs <CMD>GitGutterEnable<CR><Plug>(GitGutterStageHunk)<CMD>GitGutterDisable<CR>
 "p>
@@ -3093,23 +3224,34 @@ for key in ['Tab', 'CR', 'BS', 'Del', 'Esc', 'Up', 'Down', 'Left', 'Right', 'Hom
 endfor
 endfunction
 silent call SetupCode()
+" mv: press a key → jump to where its normal-mode mapping is defined (GotoMap)
 nmap mv <CMD>echo "press char"<CR><CMD>let c = getcharstr() <bar> lua GotoMap(vim.fn.eval("get(g:char2code, c, c)"))<CR>
+" mV: press a key → show its insert-mode mapping
 nmap mV <CMD>echo "press char"<CR><CMD>let c = getcharstr() <bar> exec "imap  ". get(g:char2code, c, c)<CR>
+" mVV: press a key → show its visual-mode mapping
 nmap mVV <CMD>echo "press char"<CR><CMD>let c = getcharstr() <bar> exec "vmap  ". get(g:char2code, c, c)<CR>
 function! GetVersionForGithub()
 
     let @* =  MinExec('version') . "\nWindows 10"
 
 endfunction 
+" \AF: fzf files in the current file's dir (cd there)
 nmap <leader>AF :Af =expand('%:p:h')<CR>
+ " \af: fzf files in cwd
  nmap <leader>af :Af =getcwd()<CR>
+ " \AG: fzf git files in the current file's dir (cd there)
  nmap <leader>AG :AG =expand('%:p:h')<CR>
+ " \ag: fzf git files in cwd
  nmap <leader>ag :AG =getcwd()<CR>
  command! -nargs=1 -complete=file Af call ChooseFile(<q-args>)
  command! -nargs=1 -complete=file AG call ChooseGFile(<q-args>)
+ " \VF: vsplit + fzf files in the current file's dir (cd there)
  nmap <leader>VF :VF =expand('%:p:h')<CR>
+ " \vf: vsplit + fzf files in cwd
  nmap <leader>vf :VF =getcwd()<CR>
+ " \VG: vsplit + fzf git files in the current file's dir (cd there)
  nmap <leader>VG :VG =expand('%:p:h')<CR>
+ " \vg: vsplit + fzf git files in cwd
  nmap <leader>vg :VG =getcwd()<CR>
  command! -nargs=1 -complete=file VF call ChooseVFile(<q-args>)
  command! -nargs=1 -complete=file VG call ChooseVGFile(<q-args>)
@@ -3174,20 +3316,27 @@ function! FzfDirChooseFile()
 
  "look for files 
  nmap <leader>AF :Af =expand('%:p:h')<CR>
+ " \af: fzf files in cwd
  nmap <leader>af :Af =getcwd()<CR>
  "look for git files
  nmap <leader>AG :AG =expand('%:p:h')<CR>
+ " \ag: fzf git files in cwd
  nmap <leader>ag :AG =getcwd()<CR>
  command! -nargs=1 -complete=file Af call ChooseFile(<q-args>)
  command! -nargs=1 -complete=file AG call ChooseGFile(<q-args>)
+ " \VF: vsplit + fzf files in the current file's dir (cd there)
  nmap <leader>VF :VF =expand('%:p:h')<CR>
+ " \vf: vsplit + fzf files in cwd
  nmap <leader>vf :VF =getcwd()<CR>
+ " \VG: vsplit + fzf git files in the current file's dir (cd there)
  nmap <leader>VG :VG =expand('%:p:h')<CR>
+ " \vg: vsplit + fzf git files in cwd
  nmap <leader>vg :VG =getcwd()<CR>
  command! -nargs=1 -complete=file VF call ChooseVFile(<q-args>)
  command! -nargs=1 -complete=file VG call ChooseVGFile(<q-args>)
  "look for directories: pick one with fzf, cd into it and open nvim-tree there
  nmap <leader>AD :Ad <C-R>=expand('%:p:h')<CR><CR>
+ " \ad: fzf-pick a subfolder of cwd → cd + nvim-tree
  nmap <leader>ad :Ad <C-R>=getcwd()<CR><CR>
  command! -nargs=1 -complete=dir Ad call ChooseDir(<q-args>)
  " optional 2nd arg: command listing files, whose dirs become the candidates
@@ -3252,6 +3401,7 @@ EOF
     execute 'e '.top.'/.git/config'
  endfunction
  command! GitConfig call Gconfig()
+ " \gc: open the repo's .git/config
  nnoremap <leader>gc :call Gconfig()<CR>
 
 " mapping for \ad
@@ -3259,4 +3409,5 @@ nmap <leader>ad <c-a>D
 function! OpenLazyplugs()
     exe 'e '.g:user_home.'\.vim\myplugins\lazyplugs.lua'
 endfunction
+" \lp: open myplugins/lazyplugs.lua
 nmap <leader>lp :call OpenLazyplugs()<CR>
