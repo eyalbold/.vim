@@ -856,19 +856,20 @@ function ClaudeInVimDir()
   vim.cmd("startinsert")
 end
 
--- Run the shell's `ci` (claude-history -g picker) in a botright vsplit (\ah).
--- Same env as ClaudeVSplit so a session resumed from it gets IDE integration.
+-- \ah: run the shell's `ci` (claude-history picker; ^R resumes) in a new
+-- claudecode.nvim-managed terminal, so the claude it spawns (cd'd to the
+-- session's project dir) inherits the IDE env and Focus/Add/diffs target it.
 function ClaudeHistory()
   local cc = require("claudecode")
   if not cc.state.server then
     cc.start(false)
   end
-  local port = require("claudecode.server.init").state.port
-  local env = { ENABLE_IDE_INTEGRATION = "true", FORCE_CODE_TERMINAL = "true" }
-  if port then env.CLAUDE_CODE_SSE_PORT = tostring(port) end
-  vim.cmd("botright vnew")
-  vim.fn.termopen({ "zsh", "-ic", "ci" }, { env = env })
-  vim.cmd("startinsert")
+  local terminal = require("claudecode.terminal")
+  local saved = terminal.defaults.terminal_cmd
+  terminal.defaults.terminal_cmd = "claude-history"
+  local ok, err = pcall(terminal.create_new_instance, {})
+  terminal.defaults.terminal_cmd = saved
+  if not ok then error(err) end
 end
 
 -- :DiffGrep [query] — fuzzy-pick a changed line across every file in the current

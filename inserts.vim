@@ -37,7 +37,7 @@ maxloadtime=3
 lastmin = 0 
 try:
     st = time.time()
-    input = open(vim.eval('g:vimloc')+'\\inserts.cache', 'rb')
+    input = open(vim.eval('g:vimloc')+'/inserts.cache', 'rb')
     inserts=pickle.load(input)
     endt= time.time()
     loadtime=endt-st

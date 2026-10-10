@@ -2657,7 +2657,9 @@ command! -nargs=1 LfGitGen <CMD>call GitF(<f-args>,0)<CR>
  :com! -nargs=1 -bang -complete=customlist,EditFileComplete
              \ Ef exec "edit<bang> ". expand("%:p:h")."/<args>"
 :fun! EditFileComplete(A,L,P)
-:    return map(filter(split(glob(expand("%:p:h").'/*'.(len(a:A)>1 ? a:A . "*" : '')), "\n"),'filewritable(v:val) != 2' ),'fnamemodify(v:val, ":t")' )
+:    " readdir (unlike glob) includes dotfiles; keep files only
+:    let l:dir = expand("%:p:h")
+:    return filter(readdir(l:dir, {n -> n =~ '^\V' . escape(a:A, '\')}), 'filewritable(l:dir . "/" . v:val) != 2')
 :endfun
 
 func! GetExtPat()
@@ -3030,7 +3032,7 @@ endfunction
 nmap <leader>vn <cmd>call CloseVspIfNeed()<CR><CMD>:vnew<CR>
 nmap <c-,> mc<leader>ac
 nmap <leader>aF mc<CMD>ClaudeCodeStop<CR>ClaudeCodeOpen<CR>
-" \ah: claude history picker (shell `ci` = claude-history -g) in a vsplit
+" \ah: claude-history picker (`ci`) in a claudecode.nvim terminal; ^R resumes a session
 nmap <leader>ah <CMD>lua ClaudeHistory()<CR>
 nmap <leader>mM <CMD>Minuet virtualtext toggle<CR>
 "nmap <leader>hs <CMD>GitGutterEnable<CR><Plug>(GitGutterStageHunk)<CMD>GitGutterDisable<CR>
@@ -3234,6 +3236,8 @@ EOF
  nnoremap <silent> <C-a>E <CMD>call ChooseDir(systemlist('git rev-parse --show-toplevel')[0], 'git ls-files')<CR>
  " \cg: cd cwd to the git root
  nnoremap <leader>cg <CMD>exe 'cd ' . fnameescape(systemlist('git rev-parse --show-toplevel')[0])<CR><CMD>pwd<CR>
+ " \cG: cd cwd to the git root of the current file (mc first)
+ nmap <leader>cG mc<leader>cg
  " \sm: re-source hacks.vim, myinit.lua and this mappings file
  nnoremap <leader>sm <CMD>source ~/.vim/hacks.vim<CR><CMD>luafile ~/.vim/myinit.lua<CR><CMD>source ~/.vim/mappings.vim<CR><CMD>echo 'hacks.vim, myinit.lua, mappings.vim sourced'<CR>
  " make <leader>vc do VimtexCompile

@@ -232,11 +232,11 @@ function! OnLoad()
 	endif 
 	call MakeItFaster(0)
 	if g:on_ek_computer
-		let g:SessionFile = ($HOME."\\.vim\\session_file") 
+		let g:SessionFile = $HOME.'/.vim/session_file' 
 		if exists('g:GuiLoaded') || ( g:on_vimr) || exists(':GonvimWorkspaceNew')
-			let g:CtrlSpaceWorkspaceFile = ($HOME."\\.vim\\workspaces\\.cs_workspaces")
+			let g:CtrlSpaceWorkspaceFile = $HOME.'/.vim/workspaces/.cs_workspaces'
 		else
-			let g:CtrlSpaceWorkspaceFile = ($HOME."\\.vim\\workspaces\\.cs_workspacesCWD")
+			let g:CtrlSpaceWorkspaceFile = $HOME.'/.vim/workspaces/.cs_workspacesCWD'
         endif 
 		let g:overrideCWD=1
 	endif

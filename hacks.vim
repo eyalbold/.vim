@@ -48,7 +48,7 @@ py3 << EOF
 import vim
 import pickle
 try:
-    input = open(vim.eval('g:vimloc')+'\\dirs.cache', 'rb')
+    input = open(vim.eval('g:vimloc')+'/dirs.cache', 'rb')
     dirs=pickle.load(input)
     input.close()
 except:
@@ -71,7 +71,7 @@ function! SaveLastDir()
 py3 << EOF
 import vim
 import pickle
-output = open(vim.eval('g:vimloc')+'\\dirs.cache', 'wb')
+output = open(vim.eval('g:vimloc')+'/dirs.cache', 'wb')
 dirs=vim.eval('g:dirs')
 dirs=list(set(dirs))
 pickle.dump(dirs ,output)
@@ -85,7 +85,7 @@ function! SaveInsertsFunc(a)
 py3 << EOF
 import vim
 import pickle
-output = open(vim.eval('g:vimloc')+'\\inserts.cache', 'wb')
+output = open(vim.eval('g:vimloc')+'/inserts.cache', 'wb')
 pickle.dump(inserts ,output)
 output.close()
 EOF
